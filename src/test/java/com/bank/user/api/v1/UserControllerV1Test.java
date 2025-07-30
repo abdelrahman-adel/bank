@@ -1,4 +1,4 @@
-package com.bank.user.api;
+package com.bank.user.api.v1;
 
 import com.bank.user.exception.BusinessErrors;
 import com.bank.user.model.dto.UserInfoDto;
@@ -32,8 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UserController.class)
-public class UserControllerTest {
+@WebMvcTest(UserControllerV1.class)
+public class UserControllerV1Test {
 
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS");
     @Autowired
@@ -82,7 +82,7 @@ public class UserControllerTest {
         when(userService.getUser(civilId)).thenReturn(userDto);
 
         // Act & Assert
-        mockMvc.perform(get("/api/v1/user").param("civilId", civilId))
+        mockMvc.perform(get("/api/v1/user/search").param("civilId", civilId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.civilId").value(civilId));
     }

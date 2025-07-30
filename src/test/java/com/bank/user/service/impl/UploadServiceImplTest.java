@@ -37,17 +37,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class UploadServiceImplTest {
 
+    @TempDir
+    Path tempDir;
     @Mock
     private UserInfoRepository userInfoRepository;
     @Mock
     private RequestTypeRepository requestTypeRepository;
     @Mock
     private UserUploadRequestRepository userUploadRequestRepository;
-
     private UploadServiceImpl uploadService;
-
-    @TempDir
-    Path tempDir;
 
     @BeforeEach
     void setUp() {

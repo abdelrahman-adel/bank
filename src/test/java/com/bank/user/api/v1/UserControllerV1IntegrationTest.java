@@ -1,4 +1,4 @@
-package com.bank.user.api;
+package com.bank.user.api.v1;
 
 import com.bank.user.config.TestContainersConfiguration;
 import com.bank.user.model.dto.UserInfoDto;
@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @Import(TestContainersConfiguration.class)
-public class UserControllerIntegrationTest {
+public class UserControllerV1IntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -129,7 +129,7 @@ public class UserControllerIntegrationTest {
         UserInfo savedUser = userInfoRepository.save(createTestUser("get-by-civil-id", "Civil ID Test"));
 
         // Act & Assert
-        mockMvc.perform(get("/api/v1/user").param("civilId", "get-by-civil-id"))
+        mockMvc.perform(get("/api/v1/user/search").param("civilId", "get-by-civil-id"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(savedUser.getId()))
                 .andExpect(jsonPath("$.civilId").value("get-by-civil-id"));

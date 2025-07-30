@@ -1,4 +1,4 @@
-package com.bank.user.api;
+package com.bank.user.api.v1;
 
 import com.bank.user.config.CachingTestConfig;
 import com.bank.user.config.TestContainersConfiguration;
@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @Import({TestContainersConfiguration.class, CachingTestConfig.class})
-public class UploadControllerIntegrationTest {
+public class UploadControllerV1IntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

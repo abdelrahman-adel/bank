@@ -1,4 +1,4 @@
-package com.bank.user.api;
+package com.bank.user.api.v1;
 
 import com.bank.user.model.dto.UploadRequest;
 import com.bank.user.service.UploadService;
@@ -16,8 +16,8 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UploadController.class)
-public class UploadControllerTest {
+@WebMvcTest(UploadControllerV1.class)
+public class UploadControllerV1Test {
 
     @Autowired
     private MockMvc mockMvc;
