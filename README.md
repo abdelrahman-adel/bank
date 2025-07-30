@@ -34,9 +34,8 @@ The application and its PostgreSQL database are defined in the `compose.yaml` fi
 ### 2. How to Execute the Tests
 
 The project is configured with a full suite of unit and integration tests. To run all tests using Maven, execute the following command:
-
-```shell
-mvn test
+```shell 
+  mvn test
 ```
 
 This command will compile the code, run all tests, and generate a test execution report in the `target/surefire-reports` directory.
