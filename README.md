@@ -1,4 +1,4 @@
-# User Service
+# Customer Service
 
 This project is a Spring Boot application designed to manage user information and handle file uploads associated with user requests. It is built with Java 21, Maven, and PostgreSQL, and is fully containerized using Docker.
 
@@ -24,7 +24,7 @@ The application and its PostgreSQL database are defined in the `compose.yaml` fi
     *   `-d`: This runs the containers in detached mode (in the background).
 
 2.  **Verify the Application is Running**: Once the containers are up, the User Service API will be available at `http://localhost:8080`. You can access the OpenAPI documentation at:
-    *   **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+    *   **Swagger UI**: `http://localhost:8080/swagger-ui/index.html`
 
 3.  **Stopping the Application**: To stop and remove the containers, run:
     ```shell
@@ -79,4 +79,4 @@ Jacoco is used to measure code coverage of the tests.
 
 ## Event-Driven Architecture
 
-This service publishes a message to the `customer.created.account` queue in RabbitMQ when a new user is created. The `account-service` listens to this queue and creates a default account for the new user.
+This service publishes a message to the `customer.created.account` queue in RabbitMQ when a new customer is created. The `account-service` is expected to listen to this queue and can then perform actions, such as creating a default account for the new customer.

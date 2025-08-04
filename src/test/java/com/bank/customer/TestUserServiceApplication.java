@@ -1,12 +1,12 @@
-package com.bank.user;
+package com.bank.customer;
 
-import com.bank.user.config.TestContainersConfiguration;
+import com.bank.customer.config.TestContainersConfiguration;
 import org.springframework.boot.SpringApplication;
 
 public class TestUserServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.from(UserServiceApplication::main).with(TestContainersConfiguration.class).run(args);
+        SpringApplication.from(CustomerServiceApplication::main).with(TestContainersConfiguration.class).run(args);
     }
 
 }

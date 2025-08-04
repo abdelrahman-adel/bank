@@ -3,9 +3,8 @@ package com.bank.customer.model.dto;
 import com.bank.customer.model.entity.CustomerType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 @Data
 public class CustomerDto {
@@ -16,6 +15,7 @@ public class CustomerDto {
     private String name;
 
     @NotBlank
+    @Pattern(regexp = "^\\d{7}$", message = "Legal ID must be 7 digits.")
     private String legalId;
 
     @NotNull
