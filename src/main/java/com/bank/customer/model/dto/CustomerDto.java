@@ -6,8 +6,14 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 @Data
-public class CustomerDto {
+public class CustomerDto implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -4877489888834032262L;
 
     private Long id;
 

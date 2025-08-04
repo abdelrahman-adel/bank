@@ -1,6 +1,6 @@
 package com.bank.customer.service.impl;
 
-import com.bank.customer.config.RabbitMQConfig;
+import com.bank.customer.event.CustomerEventPublisher;
 import com.bank.customer.exception.BusinessException;
 import com.bank.customer.model.dto.CustomerDto;
 import com.bank.customer.model.entity.Customer;
@@ -12,14 +12,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,7 +32,7 @@ class CustomerServiceImplTest {
     private CustomerMapper customerMapper;
 
     @Mock
-    private RabbitTemplate rabbitTemplate;
+    private CustomerEventPublisher eventPublisher;
 
     @InjectMocks
     private CustomerServiceImpl customerService;
@@ -61,7 +59,7 @@ class CustomerServiceImplTest {
 
         // Assert
         verify(customerRepository).save(customerEntity);
-        verify(rabbitTemplate).convertAndSend(eq(RabbitMQConfig.CUSTOMER_CREATED_QUEUE), any(CustomerDto.class));
+        verify(eventPublisher).publishCustomerCreatedEvent(any(CustomerDto.class));
     }
 
     @Test
@@ -77,6 +75,31 @@ class CustomerServiceImplTest {
             customerService.createCustomer(requestDto);
         });
 
-        verify(rabbitTemplate, never()).convertAndSend(anyString(), any(CustomerDto.class));
+        verify(eventPublisher, never()).publishCustomerCreatedEvent(any(CustomerDto.class));
+    }
+
+    @Test
+    void whenGetCustomer_withExistingId_shouldReturnDto() {
+        // Arrange
+        Customer customer = new Customer();
+        customer.setId(1L);
+        CustomerDto customerDto = new CustomerDto();
+        customerDto.setId(1L);
+
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(customerMapper.toDto(customer)).thenReturn(customerDto);
+
+        // Act
+        CustomerDto result = customerService.getCustomer(1L);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(1L);
+    }
+
+    @Test
+    void whenGetCustomer_withNonExistingId_shouldThrowException() {
+        when(customerRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(BusinessException.class, () -> customerService.getCustomer(99L));
     }
 }

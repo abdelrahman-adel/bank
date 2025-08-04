@@ -9,10 +9,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -35,7 +35,7 @@ class CustomerControllerV1Test {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private CustomerService customerService;
 
     @Test
@@ -75,6 +75,37 @@ class CustomerControllerV1Test {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void whenCreateCustomer_withInvalidLegalId_shouldReturnBadRequest() throws Exception {
+        CustomerDto requestDto = new CustomerDto();
+        requestDto.setName("Test Corp");
+        requestDto.setLegalId("123"); // Invalid ID
+        requestDto.setType(CustomerType.CORPORATE);
+
+        mockMvc.perform(post("/api/v1/customer")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = "USER")
+    void whenGetCustomerById_withExistingId_shouldReturnCustomer() throws Exception {
+        CustomerDto responseDto = new CustomerDto();
+        responseDto.setId(1L);
+        responseDto.setName("Test Corp");
+        responseDto.setLegalId("1234567");
+
+        when(customerService.getCustomer(1L)).thenReturn(responseDto);
+
+        mockMvc.perform(get("/api/v1/customer/{id}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.name").value("Test Corp"));
     }
 
     @Test
