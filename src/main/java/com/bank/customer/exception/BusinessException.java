@@ -1,4 +1,4 @@
-package com.bank.user.exception;
+package com.bank.customer.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

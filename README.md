@@ -76,3 +76,7 @@ Jacoco is used to measure code coverage of the tests.
     ```
 2.  **View the Report**: Open the following file in your web browser:
     `target/site/jacoco/index.html`
+
+## Event-Driven Architecture
+
+This service publishes a message to the `customer.created.account` queue in RabbitMQ when a new user is created. The `account-service` listens to this queue and creates a default account for the new user.

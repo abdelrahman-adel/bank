@@ -2,7 +2,7 @@ services:
   postgres:
     image: 'postgres:latest'
     environment:
-      - 'POSTGRES_DB=user_db'
+      - 'POSTGRES_DB=customer_db'
       - 'POSTGRES_PASSWORD=admin'
       - 'POSTGRES_USER=admin'
     ports:
@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U admin -d user_db" ]
+      test: [ "CMD-SHELL", "pg_isready -U admin -d customer_db" ]
       interval: 20s
       timeout: 20s
       retries: 5
@@ -18,7 +18,7 @@ services:
 
   app:
     build: .
-    container_name: UserService
+    container_name: CustomerService
     ports:
       - '8080:8080'
     depends_on:
@@ -29,13 +29,11 @@ services:
       - SPRING_DATASOURCE_PORT=5432
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=admin
-      - FILE_STORAGE_LOCATION=/app/storage
-      - MAX_FILE_SIZE=3MB
-      - MAX_REQUEST_SIZE=15MB
-    volumes:
-      - file_storage:/app/storage
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=admin
+      - SPRING_RABBITMQ_PASSWORD=admin
     restart: unless-stopped
 
 volumes:
   postgres_data:
-  file_storage:
