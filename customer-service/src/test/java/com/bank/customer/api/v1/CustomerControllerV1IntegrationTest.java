@@ -3,9 +3,9 @@ package com.bank.customer.api.v1;
 import com.bank.customer.config.RabbitMQConfig;
 import com.bank.customer.config.TestContainersConfiguration;
 import com.bank.customer.model.dto.CustomerDto;
-import com.bank.customer.model.entity.Customer;
 import com.bank.customer.model.dto.CustomerStatus;
 import com.bank.customer.model.dto.CustomerType;
+import com.bank.customer.model.entity.Customer;
 import com.bank.customer.repository.CustomerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@Transactional
 @Import(TestContainersConfiguration.class)
 class CustomerControllerV1IntegrationTest {
 
@@ -63,6 +62,7 @@ class CustomerControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "admin", roles = "ADMIN")
     void whenCreateCustomer_withValidData_shouldSucceedAndPublishEvent() throws Exception {
         // Arrange
@@ -98,6 +98,7 @@ class CustomerControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "admin", roles = "ADMIN")
     void whenCreateCustomer_withDuplicateLegalId_shouldReturnConflict() throws Exception {
         // Arrange: Create an initial customer directly in the DB
@@ -123,6 +124,7 @@ class CustomerControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "admin", roles = "ADMIN")
     void whenCreateCustomer_withMissingName_shouldReturnBadRequest() throws Exception {
         // Arrange
@@ -140,6 +142,7 @@ class CustomerControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "user", roles = "USER")
     void whenGetCustomerById_withExistingCustomer_shouldReturnOk() throws Exception {
         // Arrange
@@ -154,6 +157,7 @@ class CustomerControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "user", roles = "USER")
     void whenGetCustomerById_withNonExistentCustomer_shouldReturnNotFound() throws Exception {
         // Act & Assert
@@ -162,6 +166,7 @@ class CustomerControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     void whenGetCustomerById_withoutAuthentication_shouldReturnUnauthorized() throws Exception {
         // Act & Assert
         mockMvc.perform(get("/api/v1/customer/{id}", 1L))
@@ -169,6 +174,7 @@ class CustomerControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "user", roles = "USER")
     void whenGetAllCustomers_shouldReturnCustomerList() throws Exception {
         // Arrange
@@ -184,6 +190,7 @@ class CustomerControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "admin", roles = "ADMIN")
     void whenUpdateCustomer_withValidData_shouldReturnOk() throws Exception {
         // Arrange
@@ -220,6 +227,7 @@ class CustomerControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "user", roles = "USER")
     void whenUpdateCustomer_withUserRole_shouldReturnForbidden() throws Exception {
         CustomerDto updateRequest = new CustomerDto();
@@ -233,6 +241,7 @@ class CustomerControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "admin", roles = "ADMIN")
     void whenDeleteCustomer_shouldReturnNoContent() throws Exception {
         // Arrange
@@ -272,7 +281,6 @@ class CustomerControllerV1IntegrationTest {
     @Nested
     @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
     @AutoConfigureMockMvc
-    @Transactional
     @Import(TestContainersConfiguration.class)
     class PublishingFailureIntegrationTest {
 

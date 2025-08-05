@@ -41,7 +41,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@Transactional
 @Import(TestContainersConfiguration.class)
 class AccountControllerV1IntegrationTest {
 
@@ -63,6 +62,7 @@ class AccountControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "admin", roles = "ADMIN")
     void whenCreateAccount_withValidData_shouldSucceed() throws Exception {
         // Arrange
@@ -93,6 +93,7 @@ class AccountControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "admin", roles = "ADMIN")
     void whenCreateAccount_forNonExistentCustomer_shouldReturnNotFound() throws Exception {
         // Arrange
@@ -114,6 +115,7 @@ class AccountControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "admin", roles = "ADMIN")
     void whenCreateAccount_forInactiveCustomer_shouldReturnBadRequest() throws Exception {
         // Arrange
@@ -136,6 +138,7 @@ class AccountControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "user", roles = "USER")
     void whenGetAccountById_withExistingAccount_shouldReturnOk() throws Exception {
         // Arrange
@@ -149,6 +152,7 @@ class AccountControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "user", roles = "USER")
     void whenGetAllAccounts_shouldReturnAccountList() throws Exception {
         // Arrange
@@ -162,6 +166,7 @@ class AccountControllerV1IntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "admin", roles = "ADMIN")
     void whenDeleteAccount_shouldReturnNoContent() throws Exception {
         // Arrange
@@ -198,7 +203,6 @@ class AccountControllerV1IntegrationTest {
     @Nested
     @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
     @AutoConfigureMockMvc
-    @Transactional
     @Import(TestContainersConfiguration.class)
     class PublishingFailureIntegrationTest {
 
