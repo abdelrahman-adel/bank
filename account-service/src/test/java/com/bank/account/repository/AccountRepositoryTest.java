@@ -1,6 +1,7 @@
 package com.bank.account.repository;
 
 import com.bank.account.config.TestContainersConfiguration;
+import com.bank.account.model.dto.AccountStatus;
 import com.bank.account.model.dto.AccountType;
 import com.bank.account.model.entity.Account;
 import org.junit.jupiter.api.Test;
@@ -28,14 +29,16 @@ class AccountRepositoryTest {
         account1.setCustomerId(1L);
         account1.setType(AccountType.SAVINGS);
         account1.setBalance(1000.0);
-        account1.setStatus("ACTIVE");
+        account1.setStatus(AccountStatus.ACTIVE);
+        account1.setAccountNumber("12345678901");
         entityManager.persist(account1);
 
         Account account2 = new Account();
         account2.setCustomerId(1L);
         account2.setType(AccountType.INVESTMENT);
         account2.setBalance(5000.0);
-        account2.setStatus("ACTIVE");
+        account2.setStatus(AccountStatus.ACTIVE);
+        account2.setAccountNumber("12345678902");
         entityManager.persist(account2);
 
         entityManager.flush();

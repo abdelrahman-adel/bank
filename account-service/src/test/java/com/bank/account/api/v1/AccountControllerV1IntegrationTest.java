@@ -3,6 +3,7 @@ package com.bank.account.api.v1;
 import com.bank.account.client.CustomerServiceClient;
 import com.bank.account.config.TestContainersConfiguration;
 import com.bank.account.model.dto.AccountDto;
+import com.bank.account.model.dto.AccountStatus;
 import com.bank.account.model.dto.AccountType;
 import com.bank.account.model.dto.CustomerDto;
 import com.bank.account.model.dto.CustomerStatus;
@@ -73,7 +74,7 @@ class AccountControllerV1IntegrationTest {
         requestDto.setCustomerLegalId(legalId);
         requestDto.setType(AccountType.SAVINGS);
         requestDto.setBalance(500.0);
-        requestDto.setStatus("ACTIVE");
+        requestDto.setStatus(AccountStatus.ACTIVE);
 
         // Act
         mockMvc.perform(post("/api/v1/account")
@@ -102,7 +103,7 @@ class AccountControllerV1IntegrationTest {
         requestDto.setCustomerLegalId(legalId);
         requestDto.setType(AccountType.SAVINGS);
         requestDto.setBalance(100.0);
-        requestDto.setStatus("ACTIVE");
+        requestDto.setStatus(AccountStatus.ACTIVE);
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/account")
@@ -124,7 +125,7 @@ class AccountControllerV1IntegrationTest {
         requestDto.setCustomerLegalId(legalId);
         requestDto.setType(AccountType.SAVINGS);
         requestDto.setBalance(200.0);
-        requestDto.setStatus("ACTIVE");
+        requestDto.setStatus(AccountStatus.ACTIVE);
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/account")
@@ -186,7 +187,7 @@ class AccountControllerV1IntegrationTest {
         account.setAccountNumber(accountNumber);
         account.setType(AccountType.SAVINGS);
         account.setBalance(1000.0);
-        account.setStatus("ACTIVE");
+        account.setStatus(AccountStatus.ACTIVE);
         return account;
     }
 
@@ -205,7 +206,7 @@ class AccountControllerV1IntegrationTest {
         private RabbitTemplate rabbitTemplate;
 
         @MockitoBean
-        private CustomerServiceClient customerServiceClient;
+        private CustomerServiceClient innerCustomerServiceClient;
 
         @Autowired
         private MockMvc mockMvc;
@@ -222,16 +223,16 @@ class AccountControllerV1IntegrationTest {
             // Arrange: Mock the Feign client to return a valid customer
             String legalId = "9998887";
             CustomerDto mockCustomer = createMockCustomer(1L, CustomerStatus.ACTIVE, CustomerType.CORPORATE);
-            when(customerServiceClient.getCustomerByLegalId(legalId)).thenReturn(mockCustomer);
+            when(innerCustomerServiceClient.getCustomerByLegalId(legalId)).thenReturn(mockCustomer);
 
             // Arrange: Mock the RabbitTemplate to fail
-            doThrow(new RuntimeException("RabbitMQ is down!")).when(rabbitTemplate).convertAndSend(anyString(), anyString(), any(Object.class));
+            doThrow(new RuntimeException("RabbitMQ is down!")).when(rabbitTemplate).convertAndSend(anyString(), anyString(), any(AccountDto.class));
 
             AccountDto requestDto = new AccountDto();
             requestDto.setCustomerLegalId(legalId);
             requestDto.setType(AccountType.SAVINGS);
             requestDto.setBalance(100.0);
-            requestDto.setStatus("ACTIVE");
+            requestDto.setStatus(AccountStatus.ACTIVE);
 
             // Act & Assert API Response
             mockMvc.perform(post("/api/v1/account")

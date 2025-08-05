@@ -19,7 +19,7 @@
         <checkstyle.version>3.6.0</checkstyle.version>
         <pmd.version>3.27.0</pmd.version>
         <springdoc.version>2.6.0</springdoc.version>
-        <spring-cloud.version>2023.0.0</spring-cloud.version>
+        <spring-cloud.version>2025.0.0</spring-cloud.version>
     </properties>
     <dependencies>
         <dependency>

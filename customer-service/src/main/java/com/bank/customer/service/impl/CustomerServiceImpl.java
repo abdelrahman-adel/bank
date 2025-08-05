@@ -8,7 +8,7 @@ import com.bank.customer.model.dto.CustomerStatus;
 import com.bank.customer.model.mapper.CustomerMapper;
 import com.bank.customer.repository.CustomerRepository;
 import com.bank.customer.service.CustomerService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

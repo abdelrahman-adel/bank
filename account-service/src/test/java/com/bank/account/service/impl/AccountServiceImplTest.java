@@ -5,6 +5,7 @@ import com.bank.account.event.AccountEventPublisher;
 import com.bank.account.exception.BusinessException;
 import com.bank.account.model.dto.AccountDto;
 import com.bank.account.model.dto.AccountType;
+import com.bank.account.model.dto.AccountUpdateRequest;
 import com.bank.account.model.dto.CustomerDto;
 import com.bank.account.model.dto.CustomerStatus;
 import com.bank.account.model.dto.CustomerType;
@@ -53,11 +54,16 @@ class AccountServiceImplTest {
 
     private CustomerDto activeCustomer;
     private AccountDto accountDto;
+    private AccountUpdateRequest accountUpdateRequest;
 
     @BeforeEach
     void setUp() {
         activeCustomer = new CustomerDto(1L, CustomerType.CORPORATE, CustomerStatus.ACTIVE);
         accountDto = new AccountDto();
+        accountDto.setCustomerLegalId(customerLegalId);
+        accountDto.setType(AccountType.SAVINGS);
+        accountDto.setBalance(500.0);
+        accountUpdateRequest = new AccountUpdateRequest();
         accountDto.setCustomerLegalId(customerLegalId);
         accountDto.setType(AccountType.SAVINGS);
         accountDto.setBalance(500.0);
@@ -167,7 +173,7 @@ class AccountServiceImplTest {
         when(accountRepository.save(any(Account.class))).thenAnswer(i -> i.getArgument(0));
         when(accountMapper.toDto(any(Account.class))).thenReturn(new AccountDto());
 
-        accountService.updateAccount(1L, accountDto);
+        accountService.updateAccount(1L, accountUpdateRequest);
 
         verify(eventPublisher).publishAccountUpdatedEvent(any(AccountDto.class));
     }
@@ -176,7 +182,7 @@ class AccountServiceImplTest {
     void updateAccount_shouldThrowException_whenAccountDoesNotExist() {
         when(accountRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(BusinessException.class, () -> accountService.updateAccount(1L, accountDto));
+        assertThrows(BusinessException.class, () -> accountService.updateAccount(1L, accountUpdateRequest));
     }
 
     @Test

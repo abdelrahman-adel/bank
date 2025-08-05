@@ -3,7 +3,9 @@ package com.bank.account.api.v1;
 import com.bank.account.config.SecurityConfig;
 import com.bank.account.exception.BusinessErrors;
 import com.bank.account.model.dto.AccountDto;
+import com.bank.account.model.dto.AccountStatus;
 import com.bank.account.model.dto.AccountType;
+import com.bank.account.model.dto.AccountUpdateRequest;
 import com.bank.account.service.AccountService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -49,6 +51,8 @@ class AccountControllerV1Test {
         AccountDto requestDto = new AccountDto();
         requestDto.setCustomerLegalId("1234567");
         requestDto.setType(AccountType.SAVINGS);
+        requestDto.setBalance(1000.0);
+        requestDto.setStatus(AccountStatus.ACTIVE);
 
         AccountDto responseDto = new AccountDto();
         responseDto.setId(1L);
@@ -106,7 +110,7 @@ class AccountControllerV1Test {
         mockMvc.perform(get("/api/v1/account/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.customerId").value(1L));
+                .andExpect(jsonPath("$.customerLegalId").value("1234567"));
     }
 
     @Test
@@ -134,20 +138,20 @@ class AccountControllerV1Test {
         mockMvc.perform(get("/api/v1/account"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(2))
-                .andExpect(jsonPath("$[0].customerId").value(1L));
+                .andExpect(jsonPath("$[0].customerLegalId").value("1234567"));
     }
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     void whenUpdateAccount_withAdminRole_shouldReturnOk() throws Exception {
         AccountDto requestDto = new AccountDto();
-        requestDto.setStatus("INACTIVE");
+        requestDto.setStatus(AccountStatus.INACTIVE);
 
         AccountDto responseDto = new AccountDto();
         responseDto.setId(1L);
-        responseDto.setStatus("INACTIVE");
+        responseDto.setStatus(AccountStatus.INACTIVE);
 
-        when(accountService.updateAccount(anyLong(), any(AccountDto.class))).thenReturn(responseDto);
+        when(accountService.updateAccount(anyLong(), any(AccountUpdateRequest.class))).thenReturn(responseDto);
 
         mockMvc.perform(put("/api/v1/account/{id}", 1L)
                         .with(csrf())
@@ -161,7 +165,7 @@ class AccountControllerV1Test {
     @WithMockUser(username = "user", roles = "USER")
     void whenUpdateAccount_withUserRole_shouldReturnForbidden() throws Exception {
         AccountDto requestDto = new AccountDto();
-        requestDto.setStatus("INACTIVE");
+        requestDto.setStatus(AccountStatus.INACTIVE);
 
         mockMvc.perform(put("/api/v1/account/{id}", 1L)
                         .with(csrf())

@@ -1,6 +1,7 @@
 package com.bank.account.api.v1;
 
 import com.bank.account.model.dto.AccountDto;
+import com.bank.account.model.dto.AccountUpdateRequest;
 import com.bank.account.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -64,9 +65,9 @@ public class AccountControllerV1 {
     @ApiResponse(responseCode = "200", description = "Account updated successfully.")
     @ApiResponse(responseCode = "404", description = "Account not found.")
     @PutMapping("/{id}")
-    public AccountDto updateAccount(@PathVariable Long id, @RequestBody @Valid AccountDto accountDto) {
+    public AccountDto updateAccount(@PathVariable Long id, @RequestBody @Valid AccountUpdateRequest accountUpdateRequest) {
         log.info("Request received to update account with ID: {}", id);
-        return accountService.updateAccount(id, accountDto);
+        return accountService.updateAccount(id, accountUpdateRequest);
     }
 
     @Operation(description = "Delete a account by ID.")

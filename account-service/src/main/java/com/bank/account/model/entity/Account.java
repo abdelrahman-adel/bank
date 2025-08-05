@@ -1,5 +1,6 @@
 package com.bank.account.model.entity;
 
+import com.bank.account.model.dto.AccountStatus;
 import com.bank.account.model.dto.AccountType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,6 +32,7 @@ public class Account {
     @Column(nullable = false)
     private Double balance;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private AccountStatus status;
 }

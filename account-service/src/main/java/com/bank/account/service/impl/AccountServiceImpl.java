@@ -6,6 +6,7 @@ import com.bank.account.exception.BusinessErrors;
 import com.bank.account.exception.SystemException;
 import com.bank.account.model.dto.AccountDto;
 import com.bank.account.model.dto.AccountType;
+import com.bank.account.model.dto.AccountUpdateRequest;
 import com.bank.account.model.dto.CustomerDto;
 import com.bank.account.model.dto.CustomerStatus;
 import com.bank.account.model.dto.CustomerType;
@@ -79,12 +80,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public AccountDto updateAccount(Long id, AccountDto accountDto) {
+    public AccountDto updateAccount(Long id, AccountUpdateRequest accountUpdateRequest) {
         log.info("Updating account with ID: {}", id);
         Account existingAccount = accountRepository.findById(id)
                 .orElseThrow(BusinessErrors.NO_SUCH_ACCOUNT::exception);
 
-        accountMapper.updateAccountFromDto(accountDto, existingAccount);
+        accountMapper.updateAccountFromDto(accountUpdateRequest, existingAccount);
 
         Account updatedAccount = accountRepository.save(existingAccount);
         log.info("Account updated successfully with ID: {}", updatedAccount.getId());
@@ -107,7 +108,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @CircuitBreaker(recover = "getCustomerFallback")
-    private CustomerDto getCustomer(AccountDto accountDto) {
+    public CustomerDto getCustomer(AccountDto accountDto) {
         CustomerDto customer;
         try {
             customer = customerServiceClient.getCustomerByLegalId(accountDto.getCustomerLegalId());
@@ -122,7 +123,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Recover
-    private CustomerDto getCustomerFallback(Throwable ex) {
+    public CustomerDto getCustomerFallback(Throwable ex) {
         throw new SystemException(ex);
     }
 

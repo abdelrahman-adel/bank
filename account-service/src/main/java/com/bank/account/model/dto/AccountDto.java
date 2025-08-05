@@ -1,5 +1,6 @@
 package com.bank.account.model.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -8,7 +9,7 @@ public class AccountDto {
 
     private Long id;
 
-    @NotNull(message = "Customer Legal ID cannot be null")
+    @NotBlank(message = "Customer Legal ID cannot be null")
     private String customerLegalId;
 
     private String accountNumber;
@@ -20,5 +21,5 @@ public class AccountDto {
     private Double balance;
 
     @NotNull(message = "Status cannot be null")
-    private String status;
+    private AccountStatus status;
 }

@@ -105,6 +105,7 @@ class CustomerControllerV1IntegrationTest {
         existingCustomer.setName("Original Corp");
         existingCustomer.setLegalId("8888888");
         existingCustomer.setType(CustomerType.CORPORATE);
+        existingCustomer.setStatus(CustomerStatus.ACTIVE);
         customerRepository.save(existingCustomer);
 
         // Prepare a request with the same legalId
@@ -260,6 +261,7 @@ class CustomerControllerV1IntegrationTest {
         customer.setLegalId(legalId);
         customer.setType(CustomerType.RETAIL);
         customer.setAddress("Test Address");
+        customer.setStatus(CustomerStatus.ACTIVE);
         return customer;
     }
 
@@ -290,11 +292,11 @@ class CustomerControllerV1IntegrationTest {
         @WithMockUser(username = "admin", roles = "ADMIN")
         void whenCreateCustomer_andPublishingFails_shouldRollbackAndReturnError() throws Exception {
             // Arrange: Mock the publisher to fail
-            doThrow(new RuntimeException("RabbitMQ is down!")).when(rabbitTemplate).convertAndSend(anyString(), anyString(), any(Object.class));
+            doThrow(new RuntimeException("RabbitMQ is down!")).when(rabbitTemplate).convertAndSend(anyString(), anyString(), any(CustomerDto.class));
 
             CustomerDto requestDto = new CustomerDto();
             requestDto.setName("Fail Test Corp");
-            requestDto.setLegalId("9998887");
+            requestDto.setLegalId("1118887");
             requestDto.setType(CustomerType.CORPORATE);
 
             // Act & Assert API Response
@@ -305,7 +307,7 @@ class CustomerControllerV1IntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             // Assert Database State (transaction should have been rolled back)
-            assertThat(customerRepository.findByLegalId("9998887")).isNotPresent();
+            assertThat(customerRepository.findByLegalId("1118887")).isNotPresent();
         }
     }
 }

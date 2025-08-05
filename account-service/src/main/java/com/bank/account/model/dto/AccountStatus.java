@@ -1,8 +1,7 @@
 package com.bank.account.model.dto;
 
-public enum CustomerStatus {
+public enum AccountStatus {
     ACTIVE,
     INACTIVE,
-    SUSPENDED,
-    CLOSED
+    SUSPENDED
 }

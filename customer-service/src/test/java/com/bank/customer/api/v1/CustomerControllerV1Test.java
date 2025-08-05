@@ -146,6 +146,8 @@ class CustomerControllerV1Test {
     void whenUpdateCustomer_withAdminRole_shouldReturnOk() throws Exception {
         CustomerDto requestDto = new CustomerDto();
         requestDto.setName("Updated Name");
+        requestDto.setLegalId("1234567");
+        requestDto.setType(CustomerType.RETAIL);
 
         CustomerDto responseDto = new CustomerDto();
         responseDto.setId(1L);

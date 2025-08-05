@@ -1,6 +1,7 @@
 package com.bank.customer.repository;
 
 import com.bank.customer.config.TestContainersConfiguration;
+import com.bank.customer.model.dto.CustomerStatus;
 import com.bank.customer.model.entity.Customer;
 import com.bank.customer.model.dto.CustomerType;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,7 @@ class CustomerRepositoryTest {
         newCustomer.setLegalId("1234567");
         newCustomer.setType(CustomerType.RETAIL);
         newCustomer.setAddress("123 Test Street");
+        newCustomer.setStatus(CustomerStatus.ACTIVE);
 
         entityManager.persistAndFlush(newCustomer);
 
