@@ -4,6 +4,7 @@ import com.bank.customer.config.RabbitMQConfig;
 import com.bank.customer.config.TestContainersConfiguration;
 import com.bank.customer.model.dto.CustomerDto;
 import com.bank.customer.model.entity.Customer;
+import com.bank.customer.model.entity.CustomerStatus;
 import com.bank.customer.model.entity.CustomerType;
 import com.bank.customer.repository.CustomerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,10 +79,13 @@ class CustomerControllerV1IntegrationTest {
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNumber())
-                .andExpect(jsonPath("$.name").value("Integration Test Corp"));
+                .andExpect(jsonPath("$.name").value("Integration Test Corp"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"));
 
         // Assert Database State
-        assertThat(customerRepository.findByLegalId("7777777")).isPresent();
+        Customer savedCustomer = customerRepository.findByLegalId("7777777").orElseThrow();
+        assertThat(savedCustomer).isNotNull();
+        assertThat(savedCustomer.getStatus()).isEqualTo(CustomerStatus.ACTIVE);
 
         // Assert RabbitMQ Message
         Object message = rabbitTemplate.receiveAndConvert(RabbitMQConfig.ACCOUNT_SERVICE_CUSTOMER_EVENTS_QUEUE, TimeUnit.SECONDS.toMillis(5));

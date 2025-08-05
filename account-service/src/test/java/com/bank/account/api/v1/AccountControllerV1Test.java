@@ -57,12 +57,12 @@ class AccountControllerV1Test {
 
         when(accountService.createAccount(any(AccountDto.class))).thenReturn(responseDto);
 
-        mockMvc.perform(post("/api/v1/accounts")
+        mockMvc.perform(post("/api/v1/account")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "http://localhost/api/v1/accounts/1"))
+                .andExpect(header().string("Location", "http://localhost/api/v1/account/1"))
                 .andExpect(jsonPath("$.id").value(1L));
     }
 
@@ -73,7 +73,7 @@ class AccountControllerV1Test {
         requestDto.setCustomerId(1L);
         requestDto.setType(AccountType.SAVINGS);
 
-        mockMvc.perform(post("/api/v1/accounts")
+        mockMvc.perform(post("/api/v1/account")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
@@ -87,7 +87,7 @@ class AccountControllerV1Test {
         requestDto.setCustomerId(null); // Invalid ID
         requestDto.setType(AccountType.SAVINGS);
 
-        mockMvc.perform(post("/api/v1/accounts")
+        mockMvc.perform(post("/api/v1/account")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
@@ -103,7 +103,7 @@ class AccountControllerV1Test {
 
         when(accountService.getAccount(1L)).thenReturn(responseDto);
 
-        mockMvc.perform(get("/api/v1/accounts/{id}", 1L))
+        mockMvc.perform(get("/api/v1/account/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.customerId").value(1L));
@@ -114,7 +114,7 @@ class AccountControllerV1Test {
     void whenGetAccountById_withNonExistentId_shouldReturnNotFound() throws Exception {
         when(accountService.getAccount(anyLong())).thenThrow(BusinessErrors.NO_SUCH_ACCOUNT.exception());
 
-        mockMvc.perform(get("/api/v1/accounts/{id}", 99L))
+        mockMvc.perform(get("/api/v1/account/{id}", 99L))
                 .andExpect(status().isNotFound());
     }
 
@@ -131,7 +131,7 @@ class AccountControllerV1Test {
 
         when(accountService.getAllAccounts()).thenReturn(List.of(account1, account2));
 
-        mockMvc.perform(get("/api/v1/accounts"))
+        mockMvc.perform(get("/api/v1/account"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(2))
                 .andExpect(jsonPath("$[0].customerId").value(1L));
@@ -149,7 +149,7 @@ class AccountControllerV1Test {
 
         when(accountService.updateAccount(anyLong(), any(AccountDto.class))).thenReturn(responseDto);
 
-        mockMvc.perform(put("/api/v1/accounts/{id}", 1L)
+        mockMvc.perform(put("/api/v1/account/{id}", 1L)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
@@ -163,7 +163,7 @@ class AccountControllerV1Test {
         AccountDto requestDto = new AccountDto();
         requestDto.setStatus("INACTIVE");
 
-        mockMvc.perform(put("/api/v1/accounts/{id}", 1L)
+        mockMvc.perform(put("/api/v1/account/{id}", 1L)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
@@ -175,7 +175,7 @@ class AccountControllerV1Test {
     void whenDeleteAccount_withAdminRole_shouldReturnNoContent() throws Exception {
         doNothing().when(accountService).deleteAccount(1L);
 
-        mockMvc.perform(delete("/api/v1/accounts/{id}", 1L)
+        mockMvc.perform(delete("/api/v1/account/{id}", 1L)
                         .with(csrf()))
                 .andExpect(status().isNoContent());
     }
@@ -183,7 +183,7 @@ class AccountControllerV1Test {
     @Test
     @WithMockUser(username = "user", roles = "USER")
     void whenDeleteAccount_withUserRole_shouldReturnForbidden() throws Exception {
-        mockMvc.perform(delete("/api/v1/accounts/{id}", 1L)
+        mockMvc.perform(delete("/api/v1/account/{id}", 1L)
                         .with(csrf()))
                 .andExpect(status().isForbidden());
     }

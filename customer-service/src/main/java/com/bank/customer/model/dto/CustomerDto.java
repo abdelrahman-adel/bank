@@ -1,5 +1,6 @@
 package com.bank.customer.model.dto;
 
+import com.bank.customer.model.entity.CustomerStatus;
 import com.bank.customer.model.entity.CustomerType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +27,8 @@ public class CustomerDto implements Serializable {
 
     @NotNull
     private CustomerType type;
+
+    private CustomerStatus status;
 
     private String address;
 }

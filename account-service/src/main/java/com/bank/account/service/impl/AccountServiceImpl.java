@@ -2,11 +2,12 @@ package com.bank.account.service.impl;
 
 import com.bank.account.client.CustomerServiceClient;
 import com.bank.account.event.AccountEventPublisher;
-import com.bank.account.exception.BusinessException;
 import com.bank.account.model.dto.AccountDto;
 import com.bank.account.model.dto.CustomerDto;
+import com.bank.account.model.dto.CustomerStatus;
 import com.bank.account.model.entity.Account;
 import com.bank.account.model.entity.AccountType;
+import com.bank.account.model.entity.CustomerType;
 import com.bank.account.model.mapper.AccountMapper;
 import com.bank.account.repository.AccountRepository;
 import com.bank.account.service.AccountService;
@@ -15,11 +16,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static com.bank.account.exception.BusinessErrors.*;
+import static com.bank.account.exception.BusinessErrors.ACCOUNT_LIMIT_EXCEEDED;
+import static com.bank.account.exception.BusinessErrors.CUSTOMER_INACTIVE;
+import static com.bank.account.exception.BusinessErrors.CUSTOMER_NOT_FOUND;
+import static com.bank.account.exception.BusinessErrors.INVESTMENT_ACCOUNT_MIN_BALANCE;
+import static com.bank.account.exception.BusinessErrors.NO_SUCH_ACCOUNT;
+import static com.bank.account.exception.BusinessErrors.RETAIL_CUSTOMER_ACCOUNT_TYPE_INVALID;
+import static com.bank.account.exception.BusinessErrors.SALARY_ACCOUNT_ALREADY_EXISTS;
 
 @Service
 @RequiredArgsConstructor
@@ -36,18 +42,18 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public AccountDto createAccount(AccountDto accountDto) {
-        CustomerDto customer = Optional.ofNullable(customerServiceClient.getCustomerById(accountDto.getCustomerId()))
+        CustomerDto customer = Optional.ofNullable(customerServiceClient.getCustomerByLegalId(accountDto.getCustomerLegalId()))
                 .orElseThrow(CUSTOMER_NOT_FOUND::exception);
 
         validateCustomer(customer);
         validateAccountCreation(accountDto, customer);
 
         Account account = accountMapper.toEntity(accountDto);
-        account.setAccountNumber(generateAccountNumber(customer.id()));
+        account.setAccountNumber(generateAccountNumber(accountDto.getCustomerLegalId()));
 
         Account savedAccount = accountRepository.save(account);
-        AccountDto savedAccountDto = accountMapper.toDto(savedAccount);
 
+        AccountDto savedAccountDto = accountMapper.toDto(savedAccount);
         eventPublisher.publishAccountCreatedEvent(savedAccountDto);
         return savedAccountDto;
     }
@@ -74,16 +80,11 @@ public class AccountServiceImpl implements AccountService {
         Account existingAccount = accountRepository.findById(id)
                 .orElseThrow(NO_SUCH_ACCOUNT::exception);
 
-        if (accountDto.getBalance() != null) {
-            existingAccount.setBalance(accountDto.getBalance());
-        }
-        if (accountDto.getStatus() != null) {
-            existingAccount.setStatus(accountDto.getStatus());
-        }
+        accountMapper.updateAccountFromDto(accountDto, existingAccount);
 
         Account updatedAccount = accountRepository.save(existingAccount);
-        AccountDto updatedAccountDto = accountMapper.toDto(updatedAccount);
 
+        AccountDto updatedAccountDto = accountMapper.toDto(updatedAccount);
         eventPublisher.publishAccountUpdatedEvent(updatedAccountDto);
         return updatedAccountDto;
     }
@@ -99,7 +100,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private void validateCustomer(CustomerDto customer) {
-        if (!"ACTIVE".equalsIgnoreCase(customer.status())) {
+        if (!CustomerStatus.ACTIVE.equals(customer.status())) {
             throw CUSTOMER_INACTIVE.exception();
         }
     }
@@ -109,7 +110,7 @@ public class AccountServiceImpl implements AccountService {
             throw ACCOUNT_LIMIT_EXCEEDED.exception();
         }
 
-        if (Objects.equals(customer.type().toString(), "RETAIL") && accountDto.getType() != AccountType.SAVINGS) {
+        if (CustomerType.RETAIL.equals(customer.type()) && accountDto.getType() != AccountType.SAVINGS) {
             throw RETAIL_CUSTOMER_ACCOUNT_TYPE_INVALID.exception();
         }
 
@@ -125,8 +126,8 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private String generateAccountNumber(Long customerId) {
+    private String generateAccountNumber(String legalId) {
         long randomSuffix = ThreadLocalRandom.current().nextLong(100, 1000);
-        return String.format("%d%03d", customerId, randomSuffix);
+        return String.format("%s%03d", legalId, randomSuffix);
     }
 }

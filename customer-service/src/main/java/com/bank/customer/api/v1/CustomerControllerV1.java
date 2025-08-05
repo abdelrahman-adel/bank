@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -50,6 +51,15 @@ public class CustomerControllerV1 {
     public CustomerDto getCustomerById(@PathVariable Long id) {
         log.info("Request received to get customer by ID: {}", id);
         return customerService.getCustomer(id);
+    }
+
+    @Operation(description = "Get customer by ID.")
+    @ApiResponse(responseCode = "200", description = "Customer info.")
+    @ApiResponse(responseCode = "404", description = "Customer not found.")
+    @GetMapping("/search")
+    public CustomerDto searchCustomer(@RequestParam String legalId) {
+        log.info("Request received to get customer by LegalId: {}", legalId);
+        return customerService.getCustomer(legalId);
     }
 
     @Operation(description = "Get all customers.")

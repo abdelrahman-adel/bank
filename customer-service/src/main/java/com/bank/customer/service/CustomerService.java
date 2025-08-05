@@ -10,6 +10,8 @@ public interface CustomerService {
 
     CustomerDto getCustomer(Long id);
 
+    CustomerDto getCustomer(String legalId);
+
     List<CustomerDto> getAllCustomers();
 
     CustomerDto updateCustomer(Long id, CustomerDto customerDto);

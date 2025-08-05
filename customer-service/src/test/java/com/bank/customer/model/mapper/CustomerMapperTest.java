@@ -2,6 +2,7 @@ package com.bank.customer.model.mapper;
 
 import com.bank.customer.model.dto.CustomerDto;
 import com.bank.customer.model.entity.Customer;
+import com.bank.customer.model.entity.CustomerStatus;
 import com.bank.customer.model.entity.CustomerType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ class CustomerMapperTest {
         entity.setLegalId("1234567");
         entity.setType(CustomerType.RETAIL);
         entity.setAddress("123 Main St");
+        entity.setStatus(CustomerStatus.ACTIVE);
 
         // Act
         CustomerDto dto = customerMapper.toDto(entity);
@@ -38,6 +40,7 @@ class CustomerMapperTest {
         assertThat(dto.getLegalId()).isEqualTo("1234567");
         assertThat(dto.getType()).isEqualTo(CustomerType.RETAIL);
         assertThat(dto.getAddress()).isEqualTo("123 Main St");
+        assertThat(dto.getStatus()).isEqualTo(CustomerStatus.ACTIVE);
     }
 
     @Test
@@ -48,6 +51,7 @@ class CustomerMapperTest {
         dto.setLegalId("7654321");
         dto.setType(CustomerType.CORPORATE);
         dto.setAddress("456 Corp Ave");
+        dto.setStatus(CustomerStatus.INACTIVE);
 
         // Act
         Customer entity = customerMapper.toEntity(dto);
@@ -59,6 +63,7 @@ class CustomerMapperTest {
         assertThat(entity.getLegalId()).isEqualTo("7654321");
         assertThat(entity.getType()).isEqualTo(CustomerType.CORPORATE);
         assertThat(entity.getAddress()).isEqualTo("456 Corp Ave");
+        assertThat(entity.getStatus()).isEqualTo(CustomerStatus.INACTIVE);
     }
 
     @Test
@@ -79,6 +84,7 @@ class CustomerMapperTest {
         dto.setLegalId("9876543");
         dto.setType(CustomerType.INVESTMENT);
         dto.setAddress(null); // Should be ignored
+        dto.setStatus(CustomerStatus.CLOSED);
 
         Customer entity = new Customer();
         entity.setId(1L);
@@ -86,6 +92,7 @@ class CustomerMapperTest {
         entity.setLegalId("1234567");
         entity.setType(CustomerType.RETAIL);
         entity.setAddress("Original Address");
+        entity.setStatus(CustomerStatus.ACTIVE);
 
         // Act
         customerMapper.updateCustomerFromDto(dto, entity);
@@ -96,5 +103,6 @@ class CustomerMapperTest {
         assertThat(entity.getLegalId()).isEqualTo("9876543");
         assertThat(entity.getType()).isEqualTo(CustomerType.INVESTMENT);
         assertThat(entity.getAddress()).isEqualTo("Original Address"); // Null value from DTO should be ignored
+        assertThat(entity.getStatus()).isEqualTo(CustomerStatus.CLOSED);
     }
 }

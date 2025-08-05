@@ -10,7 +10,7 @@ public class AccountDto {
     private Long id;
 
     @NotNull(message = "Customer ID cannot be null")
-    private Long customerId;
+    private String customerLegalId;
 
     private String accountNumber;
 

@@ -4,11 +4,13 @@ import com.bank.customer.event.CustomerEventPublisher;
 import com.bank.customer.exception.BusinessException;
 import com.bank.customer.model.dto.CustomerDto;
 import com.bank.customer.model.entity.Customer;
+import com.bank.customer.model.entity.CustomerStatus;
 import com.bank.customer.model.entity.CustomerType;
 import com.bank.customer.model.mapper.CustomerMapper;
 import com.bank.customer.repository.CustomerRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -60,7 +62,12 @@ class CustomerServiceImplTest {
         customerService.createCustomer(requestDto);
 
         // Assert
-        verify(customerRepository).save(customerEntity);
+        ArgumentCaptor<Customer> customerCaptor = ArgumentCaptor.forClass(Customer.class);
+
+        verify(customerRepository).save(customerCaptor.capture());
+        Customer savedCustomer = customerCaptor.getValue();
+
+        assertThat(savedCustomer.getStatus()).isEqualTo(CustomerStatus.ACTIVE);
         verify(eventPublisher).publishCustomerCreatedEvent(any(CustomerDto.class));
     }
 
@@ -126,7 +133,7 @@ class CustomerServiceImplTest {
 
         // Assert
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId()).isEqualTo(1L);
+        assertThat(result.getFirst().getId()).isEqualTo(1L);
     }
 
     @Test

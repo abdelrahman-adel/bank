@@ -27,6 +27,10 @@ public class Customer {
     @Column(nullable = false)
     private CustomerType type;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CustomerStatus status;
+
     @Column
     private String address;
 }
