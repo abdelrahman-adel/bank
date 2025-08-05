@@ -2,6 +2,7 @@ package com.bank.account.api.v1;
 
 import com.bank.account.client.CustomerServiceClient;
 import com.bank.account.config.TestContainersConfiguration;
+import com.bank.account.config.TestRabbitMQConfig;
 import com.bank.account.model.dto.AccountDto;
 import com.bank.account.model.dto.AccountStatus;
 import com.bank.account.model.dto.AccountType;
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@Import(TestContainersConfiguration.class)
+@Import({TestContainersConfiguration.class, TestRabbitMQConfig.class})
 class AccountControllerV1IntegrationTest {
 
     @Autowired
@@ -55,6 +57,9 @@ class AccountControllerV1IntegrationTest {
 
     @MockitoBean
     private CustomerServiceClient customerServiceClient;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @BeforeEach
     void setUp() {
@@ -90,6 +95,16 @@ class AccountControllerV1IntegrationTest {
         List<Account> accounts = accountRepository.findAll();
         assertThat(accounts).hasSize(1);
         assertThat(accounts.getFirst().getCustomerId()).isEqualTo(mockCustomer.getId());
+
+        // Assert RabbitMQ Message
+        Object message = rabbitTemplate.receiveAndConvert(TestRabbitMQConfig.ACCOUNT_EVENTS_CONSUMER_QUEUE, TimeUnit.SECONDS.toMillis(5));
+        assertThat(message).isNotNull();
+        assertThat(message).isInstanceOf(AccountDto.class);
+
+        AccountDto receivedDto = (AccountDto) message;
+        assertThat(receivedDto.getId()).isNotNull();
+        assertThat(receivedDto.getCustomerLegalId()).isNotNull();
+        assertThat(receivedDto.getCustomerLegalId()).isEqualTo(legalId);
     }
 
     @Test
@@ -180,6 +195,14 @@ class AccountControllerV1IntegrationTest {
 
         // Verify DB state
         assertThat(accountRepository.findById(accountId)).isNotPresent();
+
+        // Assert RabbitMQ Message
+        Object message = rabbitTemplate.receiveAndConvert(TestRabbitMQConfig.ACCOUNT_EVENTS_CONSUMER_QUEUE, TimeUnit.SECONDS.toMillis(5));
+        assertThat(message).isNotNull();
+        assertThat(message).isInstanceOf(Long.class);
+
+        Long receivedId = (Long) message;
+        assertThat(receivedId).isEqualTo(accountId);
     }
 
     private CustomerDto createMockCustomer(Long id, CustomerStatus status, CustomerType type) {

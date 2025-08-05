@@ -1,9 +1,9 @@
 package com.bank.customer.model.mapper;
 
 import com.bank.customer.model.dto.CustomerDto;
-import com.bank.customer.model.entity.Customer;
 import com.bank.customer.model.dto.CustomerStatus;
 import com.bank.customer.model.dto.CustomerType;
+import com.bank.customer.model.entity.Customer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

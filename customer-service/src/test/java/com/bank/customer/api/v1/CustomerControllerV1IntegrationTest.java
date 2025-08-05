@@ -1,7 +1,7 @@
 package com.bank.customer.api.v1;
 
-import com.bank.customer.config.RabbitMQConfig;
 import com.bank.customer.config.TestContainersConfiguration;
+import com.bank.customer.config.TestRabbitMQConfig;
 import com.bank.customer.model.dto.CustomerDto;
 import com.bank.customer.model.dto.CustomerStatus;
 import com.bank.customer.model.dto.CustomerType;
@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@Import(TestContainersConfiguration.class)
+@Import({TestContainersConfiguration.class, TestRabbitMQConfig.class})
 class CustomerControllerV1IntegrationTest {
 
     @Autowired
@@ -58,7 +58,7 @@ class CustomerControllerV1IntegrationTest {
     void setUp() {
         customerRepository.deleteAll();
         // Purge the queue to ensure no messages from previous tests interfere
-        rabbitTemplate.receive(RabbitMQConfig.ACCOUNT_SERVICE_CUSTOMER_EVENTS_QUEUE);
+        rabbitTemplate.receive(TestRabbitMQConfig.CUSTOMER_EVENTS_CONSUMER_QUEUE);
     }
 
     @Test
@@ -88,7 +88,7 @@ class CustomerControllerV1IntegrationTest {
         assertThat(savedCustomer.getStatus()).isEqualTo(CustomerStatus.ACTIVE);
 
         // Assert RabbitMQ Message
-        Object message = rabbitTemplate.receiveAndConvert(RabbitMQConfig.ACCOUNT_SERVICE_CUSTOMER_EVENTS_QUEUE, TimeUnit.SECONDS.toMillis(5));
+        Object message = rabbitTemplate.receiveAndConvert(TestRabbitMQConfig.CUSTOMER_EVENTS_CONSUMER_QUEUE, TimeUnit.SECONDS.toMillis(5));
         assertThat(message).isNotNull();
         assertThat(message).isInstanceOf(CustomerDto.class);
 
@@ -217,7 +217,7 @@ class CustomerControllerV1IntegrationTest {
         assertThat(updatedCustomer.getAddress()).isEqualTo("Updated Address");
 
         // Assert RabbitMQ Message
-        Object message = rabbitTemplate.receiveAndConvert(RabbitMQConfig.ACCOUNT_SERVICE_CUSTOMER_EVENTS_QUEUE, TimeUnit.SECONDS.toMillis(5));
+        Object message = rabbitTemplate.receiveAndConvert(TestRabbitMQConfig.CUSTOMER_EVENTS_CONSUMER_QUEUE, TimeUnit.SECONDS.toMillis(5));
         assertThat(message).isNotNull();
         assertThat(message).isInstanceOf(CustomerDto.class);
 
@@ -257,7 +257,7 @@ class CustomerControllerV1IntegrationTest {
         assertThat(customerRepository.findById(customerId)).isNotPresent();
 
         // Assert RabbitMQ Message
-        Object message = rabbitTemplate.receiveAndConvert(RabbitMQConfig.ACCOUNT_SERVICE_CUSTOMER_EVENTS_QUEUE, TimeUnit.SECONDS.toMillis(5));
+        Object message = rabbitTemplate.receiveAndConvert(TestRabbitMQConfig.CUSTOMER_EVENTS_CONSUMER_QUEUE, TimeUnit.SECONDS.toMillis(5));
         assertThat(message).isNotNull();
         assertThat(message).isInstanceOf(Long.class);
         Long receivedId = (Long) message;

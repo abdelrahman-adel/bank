@@ -29,10 +29,10 @@ public class AccountEventPublisher {
 
     private <T> void sendEvent(String routingKey, T message, Object messageId) {
         try {
-            rabbitTemplate.convertAndSend(RabbitMQConfig.ACCOUNT_EVENTS_TOPIC_EXCHANGE, routingKey, message);
-            log.info("Published event to exchange '{}' with routing key '{}' for ID: {}.", RabbitMQConfig.ACCOUNT_EVENTS_TOPIC_EXCHANGE, routingKey, messageId);
+            rabbitTemplate.convertAndSend(RabbitMQConfig.ACCOUNT_EVENTS_TOPIC, routingKey, message);
+            log.info("Published event to exchange '{}' with routing key '{}' for ID: {}.", RabbitMQConfig.ACCOUNT_EVENTS_TOPIC, routingKey, messageId);
         } catch (Exception e) {
-            log.error("Failed to publish event to exchange '{}' with routing key '{}' for ID: {}.", RabbitMQConfig.ACCOUNT_EVENTS_TOPIC_EXCHANGE, routingKey, messageId, e);
+            log.error("Failed to publish event to exchange '{}' with routing key '{}' for ID: {}.", RabbitMQConfig.ACCOUNT_EVENTS_TOPIC, routingKey, messageId, e);
             throw new SystemException(e);
         }
     }
