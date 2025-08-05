@@ -4,24 +4,23 @@ import com.bank.account.model.entity.AccountType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 @Data
-public class AccountDto implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class AccountDto {
 
     private Long id;
 
-    @NotNull
+    @NotNull(message = "Customer ID cannot be null")
     private Long customerId;
 
-    @NotNull
+    private String accountNumber;
+
+    @NotNull(message = "Account type cannot be null")
     private AccountType type;
 
+    @NotNull(message = "Balance cannot be null")
     private Double balance;
 
+    @NotNull(message = "Status cannot be null")
     private String status;
 }
+

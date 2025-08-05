@@ -1,57 +1,69 @@
 package com.bank.account.service.impl;
 
+import com.bank.account.client.CustomerServiceClient;
 import com.bank.account.event.AccountEventPublisher;
-import com.bank.account.exception.BusinessErrors;
+import com.bank.account.exception.BusinessException;
 import com.bank.account.model.dto.AccountDto;
+import com.bank.account.model.dto.CustomerDto;
 import com.bank.account.model.entity.Account;
+import com.bank.account.model.entity.AccountType;
 import com.bank.account.model.mapper.AccountMapper;
 import com.bank.account.repository.AccountRepository;
 import com.bank.account.service.AccountService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
-@Slf4j
+import static com.bank.account.exception.BusinessErrors.*;
+
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
+    private static final int MAX_ACCOUNTS_PER_CUSTOMER = 10;
+    private static final double MIN_INVESTMENT_BALANCE = 10000.0;
+
     private final AccountRepository accountRepository;
     private final AccountMapper accountMapper;
     private final AccountEventPublisher eventPublisher;
+    private final CustomerServiceClient customerServiceClient;
 
     @Override
     @Transactional
     public AccountDto createAccount(AccountDto accountDto) {
-        if (accountRepository.countByCustomerId(accountDto.getCustomerId()) >= 10) {
-            throw BusinessErrors.MAX_ACCOUNTS_REACHED.exception();
-        }
+        CustomerDto customer = Optional.ofNullable(customerServiceClient.getCustomerById(accountDto.getCustomerId()))
+                .orElseThrow(CUSTOMER_NOT_FOUND::exception);
+
+        validateCustomer(customer);
+        validateAccountCreation(accountDto, customer);
 
         Account account = accountMapper.toEntity(accountDto);
-        account = accountRepository.save(account);
-        log.info("Account for customer ID {} created successfully with ID {}.", account.getCustomerId(), account.getId());
+        account.setAccountNumber(generateAccountNumber(customer.id()));
 
-        AccountDto createdDto = accountMapper.toDto(account);
-        eventPublisher.publishAccountCreatedEvent(createdDto);
-        return createdDto;
+        Account savedAccount = accountRepository.save(account);
+        AccountDto savedAccountDto = accountMapper.toDto(savedAccount);
+
+        eventPublisher.publishAccountCreatedEvent(savedAccountDto);
+        return savedAccountDto;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AccountDto getAccount(Long id) {
         return accountRepository.findById(id)
                 .map(accountMapper::toDto)
-                .orElseThrow(BusinessErrors.NO_SUCH_ACCOUNT::exception);
+                .orElseThrow(NO_SUCH_ACCOUNT::exception);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AccountDto> getAllAccounts() {
-        log.debug("Fetching all accounts from the database.");
-        return accountRepository.findAll()
-                .stream()
+        return accountRepository.findAll().stream()
                 .map(accountMapper::toDto)
                 .toList();
     }
@@ -59,25 +71,62 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public AccountDto updateAccount(Long id, AccountDto accountDto) {
-        Account accountToUpdate = accountRepository.findById(id)
-                .orElseThrow(BusinessErrors.NO_SUCH_ACCOUNT::exception);
+        Account existingAccount = accountRepository.findById(id)
+                .orElseThrow(NO_SUCH_ACCOUNT::exception);
 
-        accountMapper.updateAccountFromDto(accountDto, accountToUpdate);
-        Account updatedAccount = accountRepository.save(accountToUpdate);
-        log.info("Account with ID {} updated successfully.", id);
-        accountDto = accountMapper.toDto(updatedAccount);
-        eventPublisher.publishAccountUpdatedEvent(accountDto);
-        return accountDto;
+        if (accountDto.getBalance() != null) {
+            existingAccount.setBalance(accountDto.getBalance());
+        }
+        if (accountDto.getStatus() != null) {
+            existingAccount.setStatus(accountDto.getStatus());
+        }
+
+        Account updatedAccount = accountRepository.save(existingAccount);
+        AccountDto updatedAccountDto = accountMapper.toDto(updatedAccount);
+
+        eventPublisher.publishAccountUpdatedEvent(updatedAccountDto);
+        return updatedAccountDto;
     }
 
     @Override
     @Transactional
     public void deleteAccount(Long id) {
         if (!accountRepository.existsById(id)) {
-            throw BusinessErrors.NO_SUCH_ACCOUNT.exception();
+            throw NO_SUCH_ACCOUNT.exception();
         }
         accountRepository.deleteById(id);
         eventPublisher.publishAccountDeletedEvent(id);
-        log.info("Account with ID {} deleted successfully.", id);
+    }
+
+    private void validateCustomer(CustomerDto customer) {
+        if (!"ACTIVE".equalsIgnoreCase(customer.status())) {
+            throw CUSTOMER_INACTIVE.exception();
+        }
+    }
+
+    private void validateAccountCreation(AccountDto accountDto, CustomerDto customer) {
+        if (accountRepository.countByCustomerId(customer.id()) >= MAX_ACCOUNTS_PER_CUSTOMER) {
+            throw ACCOUNT_LIMIT_EXCEEDED.exception();
+        }
+
+        if (Objects.equals(customer.type().toString(), "RETAIL") && accountDto.getType() != AccountType.SAVINGS) {
+            throw RETAIL_CUSTOMER_ACCOUNT_TYPE_INVALID.exception();
+        }
+
+        if (accountDto.getType() == AccountType.SALARY) {
+            accountRepository.findByCustomerIdAndType(customer.id(), AccountType.SALARY)
+                    .ifPresent(a -> {
+                        throw SALARY_ACCOUNT_ALREADY_EXISTS.exception();
+                    });
+        }
+
+        if (accountDto.getType() == AccountType.INVESTMENT && accountDto.getBalance() < MIN_INVESTMENT_BALANCE) {
+            throw INVESTMENT_ACCOUNT_MIN_BALANCE.exception();
+        }
+    }
+
+    private String generateAccountNumber(Long customerId) {
+        long randomSuffix = ThreadLocalRandom.current().nextLong(100, 1000);
+        return String.format("%d%03d", customerId, randomSuffix);
     }
 }

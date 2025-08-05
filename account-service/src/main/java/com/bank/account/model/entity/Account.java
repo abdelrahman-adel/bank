@@ -20,6 +20,9 @@ public class Account {
     @Column(nullable = false)
     private Long customerId;
 
+    @Column(nullable = false, unique = true)
+    private String accountNumber;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AccountType type;

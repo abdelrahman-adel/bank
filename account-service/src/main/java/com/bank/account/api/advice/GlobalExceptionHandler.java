@@ -1,7 +1,7 @@
 package com.bank.account.api.advice;
 
-import com.bank.customer.exception.BusinessException;
-import com.bank.customer.exception.SystemException;
+import com.bank.account.exception.BusinessException;
+import com.bank.account.exception.SystemException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.ErrorResponse;
