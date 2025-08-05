@@ -1,8 +1,8 @@
 package com.bank.account.model.mapper;
 
 import com.bank.account.model.dto.AccountDto;
+import com.bank.account.model.dto.AccountType;
 import com.bank.account.model.entity.Account;
-import com.bank.account.model.entity.AccountType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

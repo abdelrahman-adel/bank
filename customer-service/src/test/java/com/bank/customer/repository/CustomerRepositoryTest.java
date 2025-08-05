@@ -2,7 +2,7 @@ package com.bank.customer.repository;
 
 import com.bank.customer.config.TestContainersConfiguration;
 import com.bank.customer.model.entity.Customer;
-import com.bank.customer.model.entity.CustomerType;
+import com.bank.customer.model.dto.CustomerType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

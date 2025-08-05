@@ -1,4 +1,4 @@
-package com.bank.account.model.entity;
+package com.bank.customer.model.dto;
 
 public enum CustomerType {
     RETAIL,

@@ -1,4 +1,4 @@
-package com.bank.customer.model.entity;
+package com.bank.customer.model.dto;
 
 public enum CustomerStatus {
     ACTIVE,

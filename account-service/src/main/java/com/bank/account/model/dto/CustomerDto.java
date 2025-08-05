@@ -1,10 +1,17 @@
 package com.bank.account.model.dto;
 
-import com.bank.account.model.entity.CustomerType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record CustomerDto(
-        Long id,
-        CustomerType type,
-        CustomerStatus status
-) {
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class CustomerDto {
+
+    private Long id;
+
+    private CustomerType type;
+
+    private CustomerStatus status;
 }

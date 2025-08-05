@@ -4,7 +4,7 @@ import com.bank.customer.event.CustomerEventPublisher;
 import com.bank.customer.exception.BusinessErrors;
 import com.bank.customer.model.dto.CustomerDto;
 import com.bank.customer.model.entity.Customer;
-import com.bank.customer.model.entity.CustomerStatus;
+import com.bank.customer.model.dto.CustomerStatus;
 import com.bank.customer.model.mapper.CustomerMapper;
 import com.bank.customer.repository.CustomerRepository;
 import com.bank.customer.service.CustomerService;

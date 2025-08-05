@@ -1,7 +1,5 @@
 package com.bank.customer.model.dto;
 
-import com.bank.customer.model.entity.CustomerStatus;
-import com.bank.customer.model.entity.CustomerType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

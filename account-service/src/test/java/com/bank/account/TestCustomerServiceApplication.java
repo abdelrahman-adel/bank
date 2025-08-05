@@ -1,6 +1,6 @@
 package com.bank.account;
 
-import com.bank.customer.config.TestContainersConfiguration;
+import com.bank.account.config.TestContainersConfiguration;
 import org.springframework.boot.SpringApplication;
 
 public class TestCustomerServiceApplication {

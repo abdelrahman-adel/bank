@@ -1,4 +1,4 @@
-package com.bank.account.model.entity;
+package com.bank.account.model.dto;
 
 public enum AccountType {
     SALARY,

@@ -3,7 +3,7 @@ package com.bank.customer.api.v1;
 import com.bank.customer.config.SecurityConfig;
 import com.bank.customer.exception.BusinessErrors;
 import com.bank.customer.model.dto.CustomerDto;
-import com.bank.customer.model.entity.CustomerType;
+import com.bank.customer.model.dto.CustomerType;
 import com.bank.customer.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;

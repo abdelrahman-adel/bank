@@ -1,7 +1,7 @@
 package com.bank.account.repository;
 
+import com.bank.account.model.dto.AccountType;
 import com.bank.account.model.entity.Account;
-import com.bank.account.model.entity.AccountType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

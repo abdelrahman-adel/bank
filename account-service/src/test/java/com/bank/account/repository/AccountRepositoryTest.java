@@ -1,8 +1,8 @@
 package com.bank.account.repository;
 
 import com.bank.account.config.TestContainersConfiguration;
+import com.bank.account.model.dto.AccountType;
 import com.bank.account.model.entity.Account;
-import com.bank.account.model.entity.AccountType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

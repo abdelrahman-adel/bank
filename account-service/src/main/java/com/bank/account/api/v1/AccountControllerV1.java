@@ -37,7 +37,7 @@ public class AccountControllerV1 {
     @ApiResponse(responseCode = "201", description = "Account created successfully.")
     @PostMapping
     public ResponseEntity<AccountDto> createAccount(@RequestBody @Valid AccountDto accountDto) {
-        log.info("Request received to create account for customer with ID: {}", accountDto.getCustomerLegalId());
+        log.info("Request received to create account for customer with legal ID: {}", accountDto.getCustomerLegalId());
         AccountDto createdAccount = accountService.createAccount(accountDto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdAccount.getId()).toUri();
         return ResponseEntity.created(uri).body(createdAccount);

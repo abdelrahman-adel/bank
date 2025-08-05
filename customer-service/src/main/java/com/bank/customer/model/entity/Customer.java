@@ -1,5 +1,7 @@
 package com.bank.customer.model.entity;
 
+import com.bank.customer.model.dto.CustomerStatus;
+import com.bank.customer.model.dto.CustomerType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

@@ -1,5 +1,6 @@
 package com.bank.account.model.entity;
 
+import com.bank.account.model.dto.AccountType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
