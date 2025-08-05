@@ -12,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Objects;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -42,5 +45,46 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.findById(id)
                 .map(customerMapper::toDto)
                 .orElseThrow(BusinessErrors.NO_SUCH_CUSTOMER::exception);
+    }
+
+    @Override
+    public List<CustomerDto> getAllCustomers() {
+        log.debug("Fetching all customers from the database.");
+        return customerRepository.findAll()
+                .stream()
+                .map(customerMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public CustomerDto updateCustomer(Long id, CustomerDto customerDto) {
+        Customer customerToUpdate = customerRepository.findById(id)
+                .orElseThrow(BusinessErrors.NO_SUCH_CUSTOMER::exception);
+
+        // Check if the legal ID is being changed to one that already exists for another customer
+        if (!Objects.equals(customerToUpdate.getLegalId(), customerDto.getLegalId())) {
+            customerRepository.findByLegalId(customerDto.getLegalId()).ifPresent(c -> {
+                throw BusinessErrors.CUSTOMER_LEGAL_ID_USED.exception();
+            });
+        }
+
+        customerMapper.updateCustomerFromDto(customerDto, customerToUpdate);
+        Customer updatedCustomer = customerRepository.save(customerToUpdate);
+        log.info("Customer with ID {} updated successfully.", id);
+        customerDto = customerMapper.toDto(updatedCustomer);
+        eventPublisher.publishCustomerUpdatedEvent(customerDto);
+        return customerDto;
+    }
+
+    @Override
+    @Transactional
+    public void deleteCustomer(Long id) {
+        if (!customerRepository.existsById(id)) {
+            throw BusinessErrors.NO_SUCH_CUSTOMER.exception();
+        }
+        customerRepository.deleteById(id);
+        eventPublisher.publishCustomerDeletedEvent(id);
+        log.info("Customer with ID {} deleted successfully.", id);
     }
 }

@@ -70,4 +70,31 @@ class CustomerMapperTest {
     void whenToEntity_withNullDto_shouldReturnNull() {
         assertThat(customerMapper.toEntity(null)).isNull();
     }
+
+    @Test
+    void whenUpdateCustomerFromDto_shouldUpdateFieldsAndIgnoreId() {
+        // Arrange
+        CustomerDto dto = new CustomerDto();
+        dto.setName("Updated Name");
+        dto.setLegalId("9876543");
+        dto.setType(CustomerType.INVESTMENT);
+        dto.setAddress(null); // Should be ignored
+
+        Customer entity = new Customer();
+        entity.setId(1L);
+        entity.setName("Original Name");
+        entity.setLegalId("1234567");
+        entity.setType(CustomerType.RETAIL);
+        entity.setAddress("Original Address");
+
+        // Act
+        customerMapper.updateCustomerFromDto(dto, entity);
+
+        // Assert
+        assertThat(entity.getId()).isEqualTo(1L); // ID should not change
+        assertThat(entity.getName()).isEqualTo("Updated Name");
+        assertThat(entity.getLegalId()).isEqualTo("9876543");
+        assertThat(entity.getType()).isEqualTo(CustomerType.INVESTMENT);
+        assertThat(entity.getAddress()).isEqualTo("Original Address"); // Null value from DTO should be ignored
+    }
 }

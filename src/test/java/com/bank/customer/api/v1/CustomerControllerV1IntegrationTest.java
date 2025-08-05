@@ -8,6 +8,7 @@ import com.bank.customer.model.entity.CustomerType;
 import com.bank.customer.repository.CustomerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +17,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,7 +58,7 @@ class CustomerControllerV1IntegrationTest {
     void setUp() {
         customerRepository.deleteAll();
         // Purge the queue to ensure no messages from previous tests interfere
-        rabbitTemplate.receive(RabbitMQConfig.CUSTOMER_CREATED_QUEUE);
+        rabbitTemplate.receive(RabbitMQConfig.ACCOUNT_SERVICE_CUSTOMER_EVENTS_QUEUE);
     }
 
     @Test
@@ -76,8 +84,7 @@ class CustomerControllerV1IntegrationTest {
         assertThat(customerRepository.findByLegalId("7777777")).isPresent();
 
         // Assert RabbitMQ Message
-        // Use receiveAndConvert with a timeout to wait for the message
-        Object message = rabbitTemplate.receiveAndConvert(RabbitMQConfig.CUSTOMER_CREATED_QUEUE, TimeUnit.SECONDS.toMillis(5));
+        Object message = rabbitTemplate.receiveAndConvert(RabbitMQConfig.ACCOUNT_SERVICE_CUSTOMER_EVENTS_QUEUE, TimeUnit.SECONDS.toMillis(5));
         assertThat(message).isNotNull();
         assertThat(message).isInstanceOf(CustomerDto.class);
 
@@ -156,6 +163,93 @@ class CustomerControllerV1IntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    @WithMockUser(username = "user", roles = "USER")
+    void whenGetAllCustomers_shouldReturnCustomerList() throws Exception {
+        // Arrange
+        customerRepository.saveAll(List.of(
+                createCustomer("List Customer 1", "1010101"),
+                createCustomer("List Customer 2", "2020202")
+        ));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/customer"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(2));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void whenUpdateCustomer_withValidData_shouldReturnOk() throws Exception {
+        // Arrange
+        Customer savedCustomer = customerRepository.save(createCustomer("Update Me", "4445556"));
+
+        CustomerDto updateRequest = new CustomerDto();
+        updateRequest.setName("Updated Name");
+        updateRequest.setLegalId("4445556"); // Keeping the same legalId
+        updateRequest.setType(CustomerType.INVESTMENT);
+        updateRequest.setAddress("Updated Address");
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/customer/{id}", savedCustomer.getId())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Updated Name"))
+                .andExpect(jsonPath("$.type").value(CustomerType.INVESTMENT.toString()));
+
+        // Verify DB state
+        Customer updatedCustomer = customerRepository.findById(savedCustomer.getId()).orElseThrow();
+        assertThat(updatedCustomer.getName()).isEqualTo("Updated Name");
+        assertThat(updatedCustomer.getAddress()).isEqualTo("Updated Address");
+
+        // Assert RabbitMQ Message
+        Object message = rabbitTemplate.receiveAndConvert(RabbitMQConfig.ACCOUNT_SERVICE_CUSTOMER_EVENTS_QUEUE, TimeUnit.SECONDS.toMillis(5));
+        assertThat(message).isNotNull();
+        assertThat(message).isInstanceOf(CustomerDto.class);
+
+        CustomerDto receivedDto = (CustomerDto) message;
+        assertThat(receivedDto.getName()).isEqualTo("Updated Name");
+        assertThat(receivedDto.getId()).isEqualTo(savedCustomer.getId());
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = "USER")
+    void whenUpdateCustomer_withUserRole_shouldReturnForbidden() throws Exception {
+        CustomerDto updateRequest = new CustomerDto();
+        updateRequest.setName("Updated Name");
+
+        mockMvc.perform(put("/api/v1/customer/{id}", 1L)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void whenDeleteCustomer_shouldReturnNoContent() throws Exception {
+        // Arrange
+        Customer savedCustomer = customerRepository.save(createCustomer("Delete Me", "6667778"));
+        long customerId = savedCustomer.getId();
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/v1/customer/{id}", customerId)
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+
+        // Verify DB state
+        assertThat(customerRepository.findById(customerId)).isNotPresent();
+
+        // Assert RabbitMQ Message
+        Object message = rabbitTemplate.receiveAndConvert(RabbitMQConfig.ACCOUNT_SERVICE_CUSTOMER_EVENTS_QUEUE, TimeUnit.SECONDS.toMillis(5));
+        assertThat(message).isNotNull();
+        assertThat(message).isInstanceOf(Long.class);
+        Long receivedId = (Long) message;
+        assertThat(receivedId).isEqualTo(customerId);
+    }
+
     private Customer createCustomer(String name, String legalId) {
         Customer customer = new Customer();
         customer.setName(name);
@@ -163,5 +257,51 @@ class CustomerControllerV1IntegrationTest {
         customer.setType(CustomerType.RETAIL);
         customer.setAddress("Test Address");
         return customer;
+    }
+
+    /**
+     * This nested class tests failure scenarios by mocking the RabbitTemplate.
+     * It runs in a separate Spring context to avoid interfering with tests that need the real RabbitMQ connection.
+     */
+    @Nested
+    @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+    @AutoConfigureMockMvc
+    @Transactional
+    @Import(TestContainersConfiguration.class)
+    class PublishingFailureIntegrationTest {
+
+        @MockitoBean
+        private RabbitTemplate rabbitTemplate;
+
+        @Autowired
+        private MockMvc mockMvc;
+
+        @Autowired
+        private CustomerRepository customerRepository;
+
+        @Autowired
+        private ObjectMapper objectMapper;
+
+        @Test
+        @WithMockUser(username = "admin", roles = "ADMIN")
+        void whenCreateCustomer_andPublishingFails_shouldRollbackAndReturnError() throws Exception {
+            // Arrange: Mock the publisher to fail
+            doThrow(new RuntimeException("RabbitMQ is down!")).when(rabbitTemplate).convertAndSend(anyString(), anyString(), any(Object.class));
+
+            CustomerDto requestDto = new CustomerDto();
+            requestDto.setName("Fail Test Corp");
+            requestDto.setLegalId("9998887");
+            requestDto.setType(CustomerType.CORPORATE);
+
+            // Act & Assert API Response
+            mockMvc.perform(post("/api/v1/customer")
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(requestDto)))
+                    .andExpect(status().isInternalServerError());
+
+            // Assert Database State (transaction should have been rolled back)
+            assertThat(customerRepository.findByLegalId("9998887")).isNotPresent();
+        }
     }
 }

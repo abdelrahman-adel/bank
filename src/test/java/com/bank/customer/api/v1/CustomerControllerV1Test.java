@@ -15,12 +15,17 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -115,5 +120,75 @@ class CustomerControllerV1Test {
 
         mockMvc.perform(get("/api/v1/customer/{id}", 99L))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = "USER")
+    void whenGetAllCustomers_shouldReturnCustomerList() throws Exception {
+        CustomerDto customer1 = new CustomerDto();
+        customer1.setId(1L);
+        customer1.setName("Customer One");
+
+        CustomerDto customer2 = new CustomerDto();
+        customer2.setId(2L);
+        customer2.setName("Customer Two");
+
+        when(customerService.getAllCustomers()).thenReturn(List.of(customer1, customer2));
+
+        mockMvc.perform(get("/api/v1/customer"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(2))
+                .andExpect(jsonPath("$[0].name").value("Customer One"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void whenUpdateCustomer_withAdminRole_shouldReturnOk() throws Exception {
+        CustomerDto requestDto = new CustomerDto();
+        requestDto.setName("Updated Name");
+
+        CustomerDto responseDto = new CustomerDto();
+        responseDto.setId(1L);
+        responseDto.setName("Updated Name");
+
+        when(customerService.updateCustomer(anyLong(), any(CustomerDto.class))).thenReturn(responseDto);
+
+        mockMvc.perform(put("/api/v1/customer/{id}", 1L)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Updated Name"));
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = "USER")
+    void whenUpdateCustomer_withUserRole_shouldReturnForbidden() throws Exception {
+        CustomerDto requestDto = new CustomerDto();
+        requestDto.setName("Updated Name");
+
+        mockMvc.perform(put("/api/v1/customer/{id}", 1L)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void whenDeleteCustomer_withAdminRole_shouldReturnNoContent() throws Exception {
+        doNothing().when(customerService).deleteCustomer(1L);
+
+        mockMvc.perform(delete("/api/v1/customer/{id}", 1L)
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = "USER")
+    void whenDeleteCustomer_withUserRole_shouldReturnForbidden() throws Exception {
+        mockMvc.perform(delete("/api/v1/customer/{id}", 1L)
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
     }
 }
