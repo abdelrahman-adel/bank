@@ -30,7 +30,15 @@ command. This is the recommended way to run the project for development or testi
    `http://localhost:8081`. You can access the OpenAPI documentation at:
     * **Swagger UI**: `http://localhost:8081/swagger-ui/index.html`
 
-3. **Stopping the Application**: To stop and remove the containers, run:
+3. **Using the APIs**: To use the APIs, you have to provide basic auth, two users are saved in-memory as a prof of
+   concept:
+
+   | User  | Password | Role(s)        | 
+   |-------|----------|----------------|
+   | user  | user     | USER           |
+   | admin | admin    | ADMIN<br/>USER |
+
+4. **Stopping the Application**: To stop and remove the containers, run:
    ```shell
    docker compose down
    ```
@@ -88,13 +96,13 @@ Jacoco is used to measure code coverage of the tests.
 
 The service exposes the following RESTful endpoints for managing account data:
 
-| Method | Path                  | Description              | Roles Allowed |
-| ------ |-----------------------|--------------------------| ------------- |
-| POST   | /api/v1/account       | Creates a new account.   | ADMIN         |
-| GET    | /api/v1/account/{id}  | Retrieves a account.     | ADMIN, USER   |
-| GET    | /api/v1/account       | Retrieves all account.   | ADMIN, USER   |
-| PUT    | /api/v1/account/{id}  | Updates a account.       | ADMIN         |
-| DELETE | /api/v1/account/{id}  | Deletes a account.       | ADMIN         |
+| Method | Path                 | Description            | Roles Allowed |
+|--------|----------------------|------------------------|---------------|
+| POST   | /api/v1/account      | Creates a new account. | ADMIN         |
+| GET    | /api/v1/account/{id} | Retrieves a account.   | ADMIN, USER   |
+| GET    | /api/v1/account      | Retrieves all account. | ADMIN, USER   |
+| PUT    | /api/v1/account/{id} | Updates a account.     | ADMIN         |
+| DELETE | /api/v1/account/{id} | Deletes a account.     | ADMIN         |
 
 ## Event-Driven Architecture
 
@@ -105,11 +113,11 @@ communication with other services in the system.
 
 The following events are published:
 
-| Routing Key                | Event Description             |
-| ---------------------------|-------------------------------|
-| `account.event.created`    | A new account is created.     |
-| `account.event.updated`    | A account is updated.         |
-| `account.event.deleted`    | A account is deleted.         |
+| Routing Key             | Event Description         |
+|-------------------------|---------------------------|
+| `account.event.created` | A new account is created. |
+| `account.event.updated` | A account is updated.     |
+| `account.event.deleted` | A account is deleted.     |
 
 ### Consumer Responsibility
 

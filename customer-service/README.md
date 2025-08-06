@@ -30,7 +30,15 @@ command. This is the recommended way to run the project for development or testi
    `http://localhost:8080`. You can access the OpenAPI documentation at:
     * **Swagger UI**: `http://localhost:8080/swagger-ui/index.html`
 
-3. **Stopping the Application**: To stop and remove the containers, run:
+3. **Using the APIs**: To use the APIs, you have to provide basic auth, two users are saved in-memory as a prof of
+   concept:
+
+   | User  | Password | Role(s)        |
+   |-------|----------|----------------|
+   | user  | user     | USER           |
+   | admin | admin    | ADMIN<br/>USER |
+
+4. **Stopping the Application**: To stop and remove the containers, run:
    ```shell
    docker compose down
    ```
