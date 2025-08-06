@@ -40,7 +40,8 @@ services:
       rabbitmq:
         condition: service_started
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/customer_db
+      - SPRING_DATASOURCE_HOST=postgres
+      - SPRING_DATASOURCE_PORT=5432
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=admin
       - SPRING_RABBITMQ_HOST=rabbitmq
@@ -61,14 +62,17 @@ services:
       rabbitmq:
         condition: service_started
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/account_db
+      - SPRING_DATASOURCE_HOST=postgres
+      - SPRING_DATASOURCE_PORT=5432
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=admin
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SPRING_RABBITMQ_PORT=5672
       - SPRING_RABBITMQ_USERNAME=admin
       - SPRING_RABBITMQ_PASSWORD=admin
-      - customer.service.url=http://customer-service:8080
+      - CUSTOMER_SERVICE_URL=http://customer-service:8080
+      - CUSTOMER_SERVICE_USERNAME=admin
+      - CUSTOMER_SERVICE_PASSWORD=admin
     restart: unless-stopped
 
 volumes:

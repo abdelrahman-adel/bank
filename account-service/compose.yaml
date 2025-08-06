@@ -28,9 +28,9 @@ services:
 
   app:
     build: .
-    container_name: CustomerService
+    container_name: account-service
     ports:
-      - '8080:8080'
+      - '8081:8080'
     depends_on:
       postgres:
         condition: service_healthy
@@ -45,6 +45,9 @@ services:
       - SPRING_RABBITMQ_PORT=5672
       - SPRING_RABBITMQ_USERNAME=admin
       - SPRING_RABBITMQ_PASSWORD=admin
+      - CUSTOMER_SERVICE_URL=http://customer-service:8080
+      - CUSTOMER_SERVICE_USERNAME=admin
+      - CUSTOMER_SERVICE_PASSWORD=admin
     restart: unless-stopped
 
 volumes:

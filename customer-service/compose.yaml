@@ -28,7 +28,7 @@ services:
 
   app:
     build: .
-    container_name: CustomerService
+    container_name: customer-service
     ports:
       - '8080:8080'
     depends_on:
