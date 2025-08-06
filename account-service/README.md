@@ -38,7 +38,10 @@ command. This is the recommended way to run the project for development or testi
    | user  | user     | USER           |
    | admin | admin    | ADMIN<br/>USER |
 
-4. **Stopping the Application**: To stop and remove the containers, run:
+4. Feel free to use the Postman collection for exploring the APIs:
+   * [Postman Collection](Account%20Service.postman_collection.json)
+
+5. **Stopping the Application**: To stop and remove the containers, run:
    ```shell
    docker compose down
    ```

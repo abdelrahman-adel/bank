@@ -6,6 +6,7 @@ import com.bank.account.model.dto.AccountType;
 import com.bank.account.model.dto.AccountUpdateRequest;
 import com.bank.account.model.entity.Account;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

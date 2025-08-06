@@ -1,0 +1,693 @@
+{
+	"info": {
+		"_postman_id": "b6d54e59-bcc5-4009-8502-c7c2d865820a",
+		"name": "Customer Service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9909036",
+		"_collection_link": "https://cloudy-comet-891827.postman.co/workspace/Mondia-Pay~e8678fb2-5ccc-4201-bb61-c13dd205bb92/collection/9909036-b6d54e59-bcc5-4009-8502-c7c2d865820a?action=share&source=collection_link&creator=9909036"
+	},
+	"item": [
+		{
+			"name": "api/v1/customer",
+			"item": [
+				{
+					"name": "{id}",
+					"item": [
+						{
+							"name": "get Customer By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/customer/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "-44333689",
+											"description": "(Required) "
+										}
+									]
+								},
+								"description": "Get customer by ID."
+							},
+							"response": [
+								{
+									"name": "Customer info.",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/customer/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"customer",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "-44333689",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"legalId\": \"8821215\",\n  \"name\": \"aute est in quis\",\n  \"type\": \"INVESTMENT\",\n  \"id\": 47978339,\n  \"status\": \"SUSPENDED\",\n  \"address\": \"aliquip est et ea\"\n}"
+								},
+								{
+									"name": "Customer not found.",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/customer/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"customer",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "-44333689",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"legalId\": \"8821215\",\n  \"name\": \"aute est in quis\",\n  \"type\": \"INVESTMENT\",\n  \"id\": 47978339,\n  \"status\": \"SUSPENDED\",\n  \"address\": \"aliquip est et ea\"\n}"
+								}
+							]
+						},
+						{
+							"name": "update Customer",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"legalId\": \"8821215\",\n  \"name\": \"aute est in quis\",\n  \"type\": \"INVESTMENT\",\n  \"id\": 47978339,\n  \"status\": \"SUSPENDED\",\n  \"address\": \"aliquip est et ea\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/customer/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "-44333689",
+											"description": "(Required) "
+										}
+									]
+								},
+								"description": "Update an existing customer."
+							},
+							"response": [
+								{
+									"name": "Customer updated successfully.",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"legalId\": \"8821215\",\n  \"name\": \"aute est in quis\",\n  \"type\": \"INVESTMENT\",\n  \"id\": 47978339,\n  \"status\": \"SUSPENDED\",\n  \"address\": \"aliquip est et ea\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/customer/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"customer",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "-44333689",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"legalId\": \"8821215\",\n  \"name\": \"aute est in quis\",\n  \"type\": \"INVESTMENT\",\n  \"id\": 47978339,\n  \"status\": \"SUSPENDED\",\n  \"address\": \"aliquip est et ea\"\n}"
+								},
+								{
+									"name": "Customer not found.",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"legalId\": \"8821215\",\n  \"name\": \"aute est in quis\",\n  \"type\": \"INVESTMENT\",\n  \"id\": 47978339,\n  \"status\": \"SUSPENDED\",\n  \"address\": \"aliquip est et ea\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/customer/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"customer",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "-44333689",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"legalId\": \"8821215\",\n  \"name\": \"aute est in quis\",\n  \"type\": \"INVESTMENT\",\n  \"id\": 47978339,\n  \"status\": \"SUSPENDED\",\n  \"address\": \"aliquip est et ea\"\n}"
+								}
+							]
+						},
+						{
+							"name": "delete Customer",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/customer/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1",
+											"description": "(Required) "
+										}
+									]
+								},
+								"description": "Delete a customer by ID."
+							},
+							"response": [
+								{
+									"name": "Customer deleted successfully.",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/customer/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"customer",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "-44333689",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"status": "No Content",
+									"code": 204,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Customer not found.",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/customer/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"customer",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "-44333689",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "get All Customers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/customer",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer"
+							]
+						},
+						"description": "Get all customers."
+					},
+					"response": [
+						{
+							"name": "List of all customers.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/customer",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "*/*"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"legalId\": \"5369820\",\n    \"name\": \"velit ex fugiat culpa non\",\n    \"type\": \"INVESTMENT\",\n    \"id\": -97663927,\n    \"status\": \"SUSPENDED\",\n    \"address\": \"mag\"\n  },\n  {\n    \"legalId\": \"3942494\",\n    \"name\": \"et\",\n    \"type\": \"RETAIL\",\n    \"id\": -96765595,\n    \"status\": \"CLOSED\",\n    \"address\": \"anim dolor esse quis proident\"\n  }\n]"
+						}
+					]
+				},
+				{
+					"name": "create Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"legalId\": \"1000001\",\n  \"name\": \"Abdelrahman\",\n  \"type\": \"CORPORATE\",\n  \"status\": \"ACTIVE\",\n  \"address\": \"Egypt, Giza\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/customer",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer"
+							]
+						},
+						"description": "Create a new customer."
+					},
+					"response": [
+						{
+							"name": "Customer created successfully.",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"legalId\": \"8821215\",\n  \"name\": \"aute est in quis\",\n  \"type\": \"INVESTMENT\",\n  \"id\": 47978339,\n  \"status\": \"SUSPENDED\",\n  \"address\": \"aliquip est et ea\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/customer",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "*/*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"legalId\": \"8821215\",\n  \"name\": \"aute est in quis\",\n  \"type\": \"INVESTMENT\",\n  \"id\": 47978339,\n  \"status\": \"SUSPENDED\",\n  \"address\": \"aliquip est et ea\"\n}"
+						}
+					]
+				},
+				{
+					"name": "search Customer",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/customer/search?legalId=ea occaecat",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"search"
+							],
+							"query": [
+								{
+									"key": "legalId",
+									"value": "ea occaecat",
+									"description": "(Required) "
+								}
+							]
+						},
+						"description": "Get customer by ID."
+					},
+					"response": [
+						{
+							"name": "Customer info.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/customer/search?legalId=ea occaecat",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"search"
+									],
+									"query": [
+										{
+											"key": "legalId",
+											"value": "ea occaecat"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "*/*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"legalId\": \"8821215\",\n  \"name\": \"aute est in quis\",\n  \"type\": \"INVESTMENT\",\n  \"id\": 47978339,\n  \"status\": \"SUSPENDED\",\n  \"address\": \"aliquip est et ea\"\n}"
+						},
+						{
+							"name": "Customer not found.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/customer/search?legalId=ea occaecat",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"search"
+									],
+									"query": [
+										{
+											"key": "legalId",
+											"value": "ea occaecat"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "*/*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"legalId\": \"8821215\",\n  \"name\": \"aute est in quis\",\n  \"type\": \"INVESTMENT\",\n  \"id\": 47978339,\n  \"status\": \"SUSPENDED\",\n  \"address\": \"aliquip est et ea\"\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "admin",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "admin",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}

@@ -24,7 +24,11 @@ Both services can be launched together using Docker Compose.
 
 ## Service-Specific Documentation
 
-For more detailed information about each service, please refer to their individual `README.md` files:
+For more detailed information about each service, please refer to their individual `README.md` files and Postman collections:
 
-*   [Account Service README](account-service/README.md)
-*   [Customer Service README](customer-service/README.md)
+* Account Service:
+    * [README](account-service/README.md)
+    * [Postman Collection](account-service/Account%20Service.postman_collection.json)
+* Customer Service:
+    * [README](customer-service/README.md)
+    * [Postman Collection](customer-service/Customer%20Service.postman_collection.json)

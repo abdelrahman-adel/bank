@@ -5,6 +5,7 @@ import com.bank.customer.model.dto.CustomerStatus;
 import com.bank.customer.model.dto.CustomerType;
 import com.bank.customer.model.entity.Customer;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
