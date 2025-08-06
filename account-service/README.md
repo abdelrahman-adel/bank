@@ -33,7 +33,7 @@ command. This is the recommended way to run the project for development or testi
 3. **Using the APIs**: To use the APIs, you have to provide basic auth, two users are saved in-memory as a prof of
    concept:
 
-   | User  | Password | Role(s)        | 
+   | User  | Password | Role(s)        |
    |-------|----------|----------------|
    | user  | user     | USER           |
    | admin | admin    | ADMIN<br/>USER |
@@ -71,7 +71,7 @@ PMD is a source code analyzer that finds common programming flaws.
    mvn pmd:pmd
    ```
 2. **View the Report**: Open the following file in your web browser:
-   `target/site/pmd.html`
+   `target/reports/pmd.html`
 
 #### Checkstyle (Code Style)
 
@@ -82,7 +82,7 @@ Checkstyle ensures the code adheres to the Google Java Style Guide.
    mvn checkstyle:checkstyle
    ```
 2. **View the Report**: Open the following file in your web browser:
-   `target/site/checkstyle.html`
+   `target/checkstyle-result.xml`
 
 #### Jacoco (Test Coverage)
 

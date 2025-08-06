@@ -71,7 +71,7 @@ PMD is a source code analyzer that finds common programming flaws.
    mvn pmd:pmd
    ```
 2. **View the Report**: Open the following file in your web browser:
-   `target/site/pmd.html`
+   `target/reports/pmd.html`
 
 #### Checkstyle (Code Style)
 
@@ -82,7 +82,7 @@ Checkstyle ensures the code adheres to the Google Java Style Guide.
    mvn checkstyle:checkstyle
    ```
 2. **View the Report**: Open the following file in your web browser:
-   `target/site/checkstyle.html`
+   `target/checkstyle-result.xml`
 
 #### Jacoco (Test Coverage)
 
