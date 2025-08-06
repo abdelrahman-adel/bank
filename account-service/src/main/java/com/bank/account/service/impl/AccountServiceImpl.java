@@ -107,6 +107,22 @@ public class AccountServiceImpl implements AccountService {
         log.info("Account deleted successfully with ID: {}", id);
     }
 
+    @Override
+    @Transactional
+    public void deleteAccountsByCustomerId(Long customerId) {
+        log.info("Deleting all accounts for customer ID: {}", customerId);
+        List<Account> accountsToDelete = accountRepository.findByCustomerId(customerId);
+        if (accountsToDelete.isEmpty()) {
+            log.warn("No accounts found for customer ID: {}, nothing to delete.", customerId);
+            return;
+        }
+        accountRepository.deleteAll(accountsToDelete);
+        for (Account account : accountsToDelete) {
+            eventPublisher.publishAccountDeletedEvent(account.getId());
+        }
+        log.info("Successfully deleted {} accounts for customer ID: {}", accountsToDelete.size(), customerId);
+    }
+
     @CircuitBreaker(recover = "getCustomerFallback")
     public CustomerDto getCustomer(AccountDto accountDto) {
         CustomerDto customer;
