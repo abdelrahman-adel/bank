@@ -16,14 +16,14 @@ public class CustomerDto implements Serializable {
 
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "Name is mandatory")
     private String name;
 
-    @NotBlank
+    @NotBlank(message = "Legal ID is mandatory")
     @Pattern(regexp = "^\\d{7}$", message = "Legal ID must be 7 digits.")
     private String legalId;
 
-    @NotNull
+    @NotNull(message = "Customer type is mandatory")
     private CustomerType type;
 
     private CustomerStatus status;

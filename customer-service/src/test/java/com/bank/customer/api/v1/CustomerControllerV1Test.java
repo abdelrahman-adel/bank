@@ -15,11 +15,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -98,6 +100,37 @@ class CustomerControllerV1Test {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void whenCreateCustomer_withExistingLegalId_shouldReturnConflict() throws Exception {
+        CustomerDto requestDto = new CustomerDto();
+        requestDto.setName("Test Corp");
+        requestDto.setLegalId("1234567");
+        requestDto.setType(CustomerType.CORPORATE);
+
+        when(customerService.createCustomer(any(CustomerDto.class))).thenThrow(BusinessErrors.CUSTOMER_LEGAL_ID_USED.exception());
+
+        mockMvc.perform(post("/api/v1/customer")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void whenCreateCustomer_withMissingName_shouldReturnBadRequest() throws Exception {
+        CustomerDto requestDto = new CustomerDto();
+        requestDto.setLegalId("1234567");
+        requestDto.setType(CustomerType.CORPORATE);
+
+        mockMvc.perform(post("/api/v1/customer")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @WithMockUser(username = "user", roles = "USER")
     void whenGetCustomerById_withExistingId_shouldReturnCustomer() throws Exception {
         CustomerDto responseDto = new CustomerDto();
@@ -142,6 +175,16 @@ class CustomerControllerV1Test {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = "USER")
+    void whenGetAllCustomers_withNoCustomers_shouldReturnEmptyList() throws Exception {
+        when(customerService.getAllCustomers()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/v1/customer"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(0));
+    }
+
+    @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     void whenUpdateCustomer_withAdminRole_shouldReturnOk() throws Exception {
         CustomerDto requestDto = new CustomerDto();
@@ -178,6 +221,40 @@ class CustomerControllerV1Test {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
+    void whenUpdateCustomer_withNonExistentId_shouldReturnNotFound() throws Exception {
+        CustomerDto requestDto = new CustomerDto();
+        requestDto.setName("Updated Name");
+        requestDto.setLegalId("1234567");
+        requestDto.setType(CustomerType.RETAIL);
+
+        when(customerService.updateCustomer(anyLong(), any(CustomerDto.class))).thenThrow(BusinessErrors.NO_SUCH_CUSTOMER.exception());
+
+        mockMvc.perform(put("/api/v1/customer/{id}", 99L)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void whenUpdateCustomer_withExistingLegalId_shouldReturnConflict() throws Exception {
+        CustomerDto requestDto = new CustomerDto();
+        requestDto.setName("Updated Name");
+        requestDto.setLegalId("1234568"); // Different legal ID
+        requestDto.setType(CustomerType.RETAIL);
+
+        when(customerService.updateCustomer(anyLong(), any(CustomerDto.class))).thenThrow(BusinessErrors.CUSTOMER_LEGAL_ID_USED.exception());
+
+        mockMvc.perform(put("/api/v1/customer/{id}", 1L)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
     void whenDeleteCustomer_withAdminRole_shouldReturnNoContent() throws Exception {
         doNothing().when(customerService).deleteCustomer(1L);
 
@@ -192,5 +269,15 @@ class CustomerControllerV1Test {
         mockMvc.perform(delete("/api/v1/customer/{id}", 1L)
                         .with(csrf()))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void whenDeleteCustomer_withNonExistentId_shouldReturnNotFound() throws Exception {
+        doThrow(BusinessErrors.NO_SUCH_CUSTOMER.exception()).when(customerService).deleteCustomer(99L);
+
+        mockMvc.perform(delete("/api/v1/customer/{id}", 99L)
+                        .with(csrf()))
+                .andExpect(status().isNotFound());
     }
 }

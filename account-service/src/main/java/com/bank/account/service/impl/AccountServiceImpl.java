@@ -3,7 +3,6 @@ package com.bank.account.service.impl;
 import com.bank.account.client.CustomerServiceClient;
 import com.bank.account.event.AccountEventPublisher;
 import com.bank.account.exception.BusinessErrors;
-import com.bank.account.exception.SystemException;
 import com.bank.account.model.dto.AccountDto;
 import com.bank.account.model.dto.AccountType;
 import com.bank.account.model.dto.AccountUpdateRequest;
@@ -17,8 +16,6 @@ import com.bank.account.service.AccountService;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.retry.annotation.CircuitBreaker;
-import org.springframework.retry.annotation.Recover;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -123,8 +120,7 @@ public class AccountServiceImpl implements AccountService {
         log.info("Successfully deleted {} accounts for customer ID: {}", accountsToDelete.size(), customerId);
     }
 
-    @CircuitBreaker(recover = "getCustomerFallback")
-    public CustomerDto getCustomer(AccountDto accountDto) {
+    private CustomerDto getCustomer(AccountDto accountDto) {
         CustomerDto customer;
         try {
             customer = customerServiceClient.getCustomerByLegalId(accountDto.getCustomerLegalId());
@@ -136,11 +132,6 @@ public class AccountServiceImpl implements AccountService {
             throw BusinessErrors.CUSTOMER_NOT_FOUND.exception();
         }
         return customer;
-    }
-
-    @Recover
-    public CustomerDto getCustomerFallback(Throwable ex) {
-        throw new SystemException(ex);
     }
 
     private void validateCustomer(CustomerDto customer) {

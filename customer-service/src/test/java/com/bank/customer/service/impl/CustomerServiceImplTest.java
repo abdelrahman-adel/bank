@@ -113,6 +113,38 @@ class CustomerServiceImplTest {
     }
 
     @Test
+    void whenGetCustomer_withExistingLegalId_shouldReturnDto() {
+        // Arrange
+        String legalId = "12345";
+        Customer customer = new Customer();
+        customer.setId(1L);
+        customer.setLegalId(legalId);
+        CustomerDto customerDto = new CustomerDto();
+        customerDto.setId(1L);
+        customerDto.setLegalId(legalId);
+
+        when(customerRepository.findByLegalId(legalId)).thenReturn(Optional.of(customer));
+        when(customerMapper.toDto(customer)).thenReturn(customerDto);
+
+        // Act
+        CustomerDto result = customerService.getCustomer(legalId);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getLegalId()).isEqualTo(legalId);
+    }
+
+    @Test
+    void whenGetCustomer_withNonExistingLegalId_shouldThrowException() {
+        // Arrange
+        String legalId = "non-existent";
+        when(customerRepository.findByLegalId(legalId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(BusinessException.class, () -> customerService.getCustomer(legalId));
+    }
+
+    @Test
     void whenGetAllCustomers_shouldReturnDtoList() {
         // Arrange
         Customer customer1 = new Customer();
@@ -137,6 +169,19 @@ class CustomerServiceImplTest {
     }
 
     @Test
+    void whenGetAllCustomers_withNoCustomers_shouldReturnEmptyList() {
+        // Arrange
+        when(customerRepository.findAll()).thenReturn(List.of());
+
+        // Act
+        List<CustomerDto> result = customerService.getAllCustomers();
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result).isEmpty();
+    }
+
+    @Test
     void whenUpdateCustomer_withExistingId_shouldSucceedAndPublishEvent() {
         // Arrange
         long customerId = 1L;
@@ -158,6 +203,37 @@ class CustomerServiceImplTest {
 
         // Assert
         verify(customerRepository).save(existingCustomer);
+        verify(eventPublisher).publishCustomerUpdatedEvent(any(CustomerDto.class));
+    }
+
+    @Test
+    void whenUpdateCustomer_withSameLegalId_shouldSucceedAndPublishEvent() {
+        // Arrange
+        long customerId = 1L;
+        String legalId = "1234567";
+        CustomerDto requestDto = new CustomerDto();
+        requestDto.setLegalId(legalId);
+        requestDto.setName("Updated Name");
+
+        Customer existingCustomer = new Customer();
+        existingCustomer.setId(customerId);
+        existingCustomer.setLegalId(legalId);
+        existingCustomer.setName("Original Name");
+
+
+        when(customerRepository.findById(customerId)).thenReturn(Optional.of(existingCustomer));
+        // findByLegalId should not be called in this case
+        when(customerRepository.save(any(Customer.class))).thenReturn(existingCustomer);
+        when(customerMapper.toDto(existingCustomer)).thenReturn(new CustomerDto());
+        doNothing().when(customerMapper).updateCustomerFromDto(requestDto, existingCustomer);
+
+
+        // Act
+        customerService.updateCustomer(customerId, requestDto);
+
+        // Assert
+        verify(customerRepository).save(existingCustomer);
+        verify(customerRepository, never()).findByLegalId(any(String.class));
         verify(eventPublisher).publishCustomerUpdatedEvent(any(CustomerDto.class));
     }
 

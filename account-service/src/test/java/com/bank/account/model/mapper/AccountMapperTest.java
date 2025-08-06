@@ -5,20 +5,13 @@ import com.bank.account.model.dto.AccountStatus;
 import com.bank.account.model.dto.AccountType;
 import com.bank.account.model.dto.AccountUpdateRequest;
 import com.bank.account.model.entity.Account;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AccountMapperTest {
 
-    private AccountMapper accountMapper;
-
-    @BeforeEach
-    void setUp() {
-        // We test the generated implementation
-        accountMapper = new AccountMapperImpl();
-    }
+    private final AccountMapper accountMapper = Mappers.getMapper(AccountMapper.class);
 
     @Test
     void whenToDto_withValidEntity_shouldReturnCorrectDto() {

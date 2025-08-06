@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -58,7 +59,9 @@ class CustomerControllerV1IntegrationTest {
     void setUp() {
         customerRepository.deleteAll();
         // Purge the queue to ensure no messages from previous tests interfere
-        rabbitTemplate.receive(TestRabbitMQConfig.CUSTOMER_EVENTS_CONSUMER_QUEUE);
+        while (rabbitTemplate.receive(TestRabbitMQConfig.CUSTOMER_EVENTS_CONSUMER_QUEUE) != null) {
+            // Purge
+        }
     }
 
     @Test
@@ -102,12 +105,7 @@ class CustomerControllerV1IntegrationTest {
     @WithMockUser(username = "admin", roles = "ADMIN")
     void whenCreateCustomer_withDuplicateLegalId_shouldReturnConflict() throws Exception {
         // Arrange: Create an initial customer directly in the DB
-        Customer existingCustomer = new Customer();
-        existingCustomer.setName("Original Corp");
-        existingCustomer.setLegalId("8888888");
-        existingCustomer.setType(CustomerType.CORPORATE);
-        existingCustomer.setStatus(CustomerStatus.ACTIVE);
-        customerRepository.save(existingCustomer);
+        customerRepository.save(createCustomer("Original Corp", "8888888"));
 
         // Prepare a request with the same legalId
         CustomerDto requestDto = new CustomerDto();
@@ -139,6 +137,21 @@ class CustomerControllerV1IntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Transactional
+    void whenCreateCustomer_withoutAuthentication_shouldReturnUnauthorized() throws Exception {
+        CustomerDto requestDto = new CustomerDto();
+        requestDto.setName("Unauthorized Corp");
+        requestDto.setLegalId("9990001");
+        requestDto.setType(CustomerType.CORPORATE);
+
+        mockMvc.perform(post("/api/v1/customer")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -191,6 +204,16 @@ class CustomerControllerV1IntegrationTest {
 
     @Test
     @Transactional
+    @WithMockUser(username = "user", roles = "USER")
+    void whenGetAllCustomers_withNoCustomers_shouldReturnEmptyList() throws Exception {
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/customer"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(0));
+    }
+
+    @Test
+    @Transactional
     @WithMockUser(username = "admin", roles = "ADMIN")
     void whenUpdateCustomer_withValidData_shouldReturnOk() throws Exception {
         // Arrange
@@ -228,6 +251,43 @@ class CustomerControllerV1IntegrationTest {
 
     @Test
     @Transactional
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void whenUpdateCustomer_withNonExistentId_shouldReturnNotFound() throws Exception {
+        CustomerDto updateRequest = new CustomerDto();
+        updateRequest.setName("Non Existent");
+        updateRequest.setLegalId("1231231");
+        updateRequest.setType(CustomerType.RETAIL);
+
+        mockMvc.perform(put("/api/v1/customer/{id}", 999L)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void whenUpdateCustomer_withDuplicateLegalId_shouldReturnConflict() throws Exception {
+        // Arrange
+        customerRepository.save(createCustomer("First Customer", "1111111"));
+        Customer customerToUpdate = customerRepository.save(createCustomer("Second Customer", "2222222"));
+
+        CustomerDto updateRequest = new CustomerDto();
+        updateRequest.setName("Updated Second Customer");
+        updateRequest.setLegalId("1111111"); // Trying to use the first customer's legalId
+        updateRequest.setType(CustomerType.RETAIL);
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/customer/{id}", customerToUpdate.getId())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @Transactional
     @WithMockUser(username = "user", roles = "USER")
     void whenUpdateCustomer_withUserRole_shouldReturnForbidden() throws Exception {
         CustomerDto updateRequest = new CustomerDto();
@@ -238,6 +298,19 @@ class CustomerControllerV1IntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Transactional
+    void whenUpdateCustomer_withoutAuthentication_shouldReturnUnauthorized() throws Exception {
+        CustomerDto updateRequest = new CustomerDto();
+        updateRequest.setName("Unauthorized Update");
+
+        mockMvc.perform(put("/api/v1/customer/{id}", 1L)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -262,6 +335,23 @@ class CustomerControllerV1IntegrationTest {
         assertThat(message).isInstanceOf(Long.class);
         Long receivedId = (Long) message;
         assertThat(receivedId).isEqualTo(customerId);
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void whenDeleteCustomer_withNonExistentId_shouldReturnNotFound() throws Exception {
+        mockMvc.perform(delete("/api/v1/customer/{id}", 999L)
+                        .with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    void whenDeleteCustomer_withoutAuthentication_shouldReturnUnauthorized() throws Exception {
+        mockMvc.perform(delete("/api/v1/customer/{id}", 1L)
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
     }
 
     private Customer createCustomer(String name, String legalId) {
@@ -316,6 +406,46 @@ class CustomerControllerV1IntegrationTest {
 
             // Assert Database State (transaction should have been rolled back)
             assertThat(customerRepository.findByLegalId("1118887")).isNotPresent();
+        }
+
+        @Test
+        @WithMockUser(username = "admin", roles = "ADMIN")
+        void whenUpdateCustomer_andPublishingFails_shouldRollbackAndReturnError() throws Exception {
+            // Arrange
+            Customer savedCustomer = customerRepository.save(createCustomer("Update Fail", "2229998"));
+            doThrow(new RuntimeException("RabbitMQ is down!")).when(rabbitTemplate).convertAndSend(anyString(), anyString(), any(CustomerDto.class));
+
+            CustomerDto updateRequest = new CustomerDto();
+            updateRequest.setName("Updated Name Fail");
+            updateRequest.setLegalId("2229998");
+            updateRequest.setType(CustomerType.INVESTMENT);
+
+            // Act & Assert
+            mockMvc.perform(put("/api/v1/customer/{id}", savedCustomer.getId())
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(updateRequest)))
+                    .andExpect(status().isInternalServerError());
+
+            // Assert Database State (transaction should have been rolled back)
+            Customer customerAfterAttempt = customerRepository.findById(savedCustomer.getId()).orElseThrow();
+            assertThat(customerAfterAttempt.getName()).isEqualTo("Update Fail"); // Name should not be updated
+        }
+
+        @Test
+        @WithMockUser(username = "admin", roles = "ADMIN")
+        void whenDeleteCustomer_andPublishingFails_shouldRollbackAndReturnError() throws Exception {
+            // Arrange
+            Customer savedCustomer = customerRepository.save(createCustomer("Delete Fail", "3330001"));
+            doThrow(new RuntimeException("RabbitMQ is down!")).when(rabbitTemplate).convertAndSend(anyString(), anyString(), anyLong());
+
+            // Act & Assert
+            mockMvc.perform(delete("/api/v1/customer/{id}", savedCustomer.getId())
+                            .with(csrf()))
+                    .andExpect(status().isInternalServerError());
+
+            // Assert Database State (transaction should have been rolled back)
+            assertThat(customerRepository.findById(savedCustomer.getId())).isPresent();
         }
     }
 }
